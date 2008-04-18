@@ -1,0 +1,7 @@
+zeit.ldap changes
+=================
+
+0.9.10 (2008-04-18)
+-------------------
+
+- First independent release from zeit.cms-core package. No other changes.
