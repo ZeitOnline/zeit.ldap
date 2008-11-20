@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='zeit.ldap',
-    version='0.9.10dev',
+    version='1.0dev',
     author='Christian Zagrodnick',
     author_email='cz@gocept.com',
     description="""\
