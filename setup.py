@@ -14,17 +14,13 @@ setup(
     license='gocept proprietary',
     namespace_packages = ['zeit'],
     install_requires=[
-        'setuptools',
-        'zeit.cms>0.9.9',
         'ldapadapter>=0.7dev-r82228',
         'ldappas>0.6',
-    ],
-    extras_require={
-        'test': [
-            'zope.securitypolicy',
-            'zope.testing',
-            'zope.app.zcmlfiles',
-            'zope.app.securitypolicy',
+        'setuptools',
+        'zeit.cms>1.4',
+        'zope.app.securitypolicy',
+        'zope.app.zcmlfiles',
+        'zope.securitypolicy',
+        'zope.testing',
         ],
-    },
 )
