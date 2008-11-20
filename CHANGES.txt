@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.0 (unreleased)
+1.0 (2008-11-20)
 ----------------
 
 - Änderungen bzgl. Security-Policy.
