@@ -1,15 +1,11 @@
 # Copyright (c) 2007-2008 gocept gmbh & co. kg
 # See also LICENSE.txt
-# $Id$
 
 import os
 import unittest
-
-from zope.testing import doctest
-
-import zope.app.testing.functional
-
 import zeit.cms.testing
+import zope.app.testing.functional
+from zope.testing import doctest
 
 
 LDAPLayer = zope.app.testing.functional.ZCMLLayer(
