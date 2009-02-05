@@ -22,8 +22,19 @@ def ldapAdapterFactory():
     return adapter
 
 
+class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
+
+    def authenticateCredentials(self, credentials):
+        if not isinstance(credentials, dict):
+            return None
+        if not credentials.get('password'):
+            return None
+        return super(LDAPAuthentication, self).authenticateCredentials(
+            credentials)
+
+
 def ldapPluginFactory():
-    ldap = ldappas.authentication.LDAPAuthentication()
+    ldap = LDAPAuthentication()
     ldap.principalIdPrefix = 'ldap.'
     ldap.adapterName = 'zeit.ldapconnection'
     ldap.searchBase = unicode(ldap_config.get('search-base', ''), 'utf8')

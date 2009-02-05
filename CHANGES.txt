@@ -4,6 +4,9 @@ zeit.ldap changes
 1.1 (unreleased)
 ----------------
 
+- Leere Passwörter ausschließen und garnicht mehr beim LDAP-Server nachfragen.
+
+
 1.0 (2008-11-20)
 ----------------
 

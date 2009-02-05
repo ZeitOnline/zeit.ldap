@@ -18,14 +18,13 @@ The authentication uses the ldap plugin:
 ('ldap',)
 >>> plugins = list(pas.getAuthenticatorPlugins())
 >>> plugins
-[('ldap', <ldappas.authentication.LDAPAuthentication object at 0x...>)]
+[('ldap', <zeit.ldap.authentication.LDAPAuthentication object at 0x...>)]
 >>> ldap = plugins[0][1]
 >>> ldap
-<ldappas.authentication.LDAPAuthentication object at 0x...>
+<zeit.ldap.authentication.LDAPAuthentication object at 0x...>
 
 
 So the ldap is basically configured correctly[2]_.
-
 
 
 .. [1]  We need to set the site here:
