@@ -1,6 +1,11 @@
 zeit.ldap changes
 =================
 
+1.1.2 (unreleased)
+------------------
+
+- Using versions from the ZTK.
+
 1.1.1 (2009-05-15)
 ------------------
 

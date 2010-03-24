@@ -10,7 +10,7 @@ authentication utility is registered and configured for using ldap[1]_:
 >>> pas = zope.component.getUtility(
 ...     zope.app.security.interfaces.IAuthentication)
 >>> pas
-<zope.app.authentication.authentication.PluggableAuthentication object at 0x...>
+<zope.pluggableauth.authentication.PluggableAuthentication object at 0x...>
 
 The authentication uses the ldap plugin:
 
