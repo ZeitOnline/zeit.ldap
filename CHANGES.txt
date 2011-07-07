@@ -4,7 +4,7 @@ zeit.ldap changes
 1.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Return email adress in PrincipalInfo.description
 
 
 1.1.2 (2010-05-17)

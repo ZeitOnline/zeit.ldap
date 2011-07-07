@@ -32,6 +32,14 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
         return super(LDAPAuthentication, self).authenticateCredentials(
             credentials)
 
+    def getInfoFromEntry(self, dn, entry):
+        info = super(LDAPAuthentication, self).getInfoFromEntry(dn, entry)
+        try:
+            info['description'] = entry['mail'][0]
+        except (KeyError, IndexError):
+            pass
+        return info
+
 
 def ldapPluginFactory():
     ldap = LDAPAuthentication()

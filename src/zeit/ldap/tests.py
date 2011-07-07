@@ -16,7 +16,6 @@ LDAPLayer = zope.app.testing.functional.ZCMLLayer(
     __name__, 'LDAPLayer', allow_teardown=True)
 
 
-
 class FakeLdap(object):
 
     def connect(self, dn=None, password=None):
@@ -25,9 +24,8 @@ class FakeLdap(object):
 
     def search(self, base, scope, filter):
         dn = 'mydn'
-        entry = {'login': 'foo'}
+        entry = {'login': ['foo'], 'mail': ['test@example.com']}
         return [(dn, entry)]
-
 
 
 class AuthenticationTest(unittest.TestCase):
@@ -58,6 +56,10 @@ class AuthenticationTest(unittest.TestCase):
         self.assertTrue(self.auth.authenticateCredentials(
             dict(login='foo', password='bar')))
 
+    def test_returns_email_address_in_description(self):
+        info = self.auth.authenticateCredentials(
+            dict(login='foo', password='bar'))
+        self.assertEqual('test@example.com', info.description)
 
 
 def test_suite():
