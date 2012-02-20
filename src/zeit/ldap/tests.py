@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2008 gocept gmbh & co. kg
+# Copyright (c) 2007-2012 gocept gmbh & co. kg
 # See also LICENSE.txt
 
 import os
@@ -7,11 +7,10 @@ import zope.component
 import ldapadapter.interfaces
 import zeit.cms.testing
 import zeit.ldap.authentication
-import zope.app.testing.functional
 from zope.testing import doctest
 
 
-LDAPLayer = zope.app.testing.functional.ZCMLLayer(
+LDAPLayer = zeit.cms.testing.ZCMLLayer(
     os.path.join(os.path.dirname(__file__), 'ftesting.zcml'),
     __name__, 'LDAPLayer', allow_teardown=True)
 
