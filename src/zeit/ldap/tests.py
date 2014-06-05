@@ -1,18 +1,14 @@
 # Copyright (c) 2007-2012 gocept gmbh & co. kg
 # See also LICENSE.txt
 
-import os
 import unittest
 import zope.component
 import ldapadapter.interfaces
 import zeit.cms.testing
 import zeit.ldap.authentication
-from zope.testing import doctest
 
 
-LDAPLayer = zeit.cms.testing.ZCMLLayer(
-    os.path.join(os.path.dirname(__file__), 'ftesting.zcml'),
-    __name__, 'LDAPLayer', allow_teardown=True)
+LDAPLayer = zeit.cms.testing.ZCMLLayer('ftesting.zcml')
 
 
 class FakeLdap(object):
@@ -65,7 +61,6 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(zeit.cms.testing.FunctionalDocFileSuite(
         'README.txt',
-        optionflags=doctest.INTERPRET_FOOTNOTES|doctest.ELLIPSIS,
         layer=LDAPLayer))
     suite.addTest(unittest.makeSuite(AuthenticationTest))
     return suite
