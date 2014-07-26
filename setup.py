@@ -8,11 +8,11 @@ setup(
     description="""\
 """,
     packages=find_packages('src'),
-    package_dir = {'': 'src'},
-    include_package_data = True,
+    package_dir={'': 'src'},
+    include_package_data=True,
     zip_safe=False,
     license='gocept proprietary',
-    namespace_packages = ['zeit'],
+    namespace_packages=['zeit'],
     install_requires=[
         'ldapadapter>=0.7dev-r82228',
         'ldappas>0.6',
@@ -22,5 +22,5 @@ setup(
         'zope.app.zcmlfiles',
         'zope.securitypolicy',
         'zope.testing',
-        ],
+    ],
 )
