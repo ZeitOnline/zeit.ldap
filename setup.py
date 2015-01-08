@@ -1,17 +1,17 @@
 from setuptools import setup, find_packages
 
+
 setup(
     name='zeit.ldap',
     version='1.2.2dev',
-    author='Christian Zagrodnick',
-    author_email='cz@gocept.com',
-    description="""\
-""",
+    author='gocept, Zeit Online',
+    author_email='zon-backend@zeit.de',
+    description="Zope3 LDAP interface",
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
-    license='gocept proprietary',
+    license='BSD',
     namespace_packages=['zeit'],
     install_requires=[
         'ldapadapter>=0.7dev-r82228',
