@@ -1,8 +1,7 @@
-
-import zope.app.authentication
-import zope.app.security.interfaces
-
 import zeit.cms.generation.install
+import zeit.cms.testing
+import zope.authentication.interfaces
+import zope.pluggableauth.authentication
 
 
 def install(root):
@@ -10,20 +9,16 @@ def install(root):
 
     auth = zeit.cms.generation.install.installLocalUtility(
         site_manager,
-        zope.app.authentication.PluggableAuthentication,
+        zope.pluggableauth.authentication.PluggableAuthentication,
         'authentication',
-        zope.app.security.interfaces.IAuthentication)
-    auth.authenticatorPlugins = ('ldap', )
+        zope.authentication.interfaces.IAuthentication)
+    auth.authenticatorPlugins = ('ldap', 'principalregistry')
     auth.credentialsPlugins = (
         'No Challenge if Authenticated',
-        'Zope Realm Basic-Auth')
+        'Session Credentials')
 
 
 def evolve(context):
-    site = zope.app.component.hooks.getSite()
-    try:
-        root = zope.app.zopeappgenerations.getRootFolder(context)
-        zope.app.component.hooks.setSite(root)
+    root = zope.generations.utility.getRootFolder(context)
+    with zeit.cms.testing.site(root):
         install(root)
-    finally:
-        zope.app.component.hooks.setSite(site)

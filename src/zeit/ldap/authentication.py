@@ -1,10 +1,8 @@
-
-import ldapadapter.interfaces
 import ldapadapter.utility
 import ldappas.authentication
-
 import zope.app.appsetup.product
-import zope.app.authentication.interfaces
+import zope.authentication.interfaces
+import zope.pluggableauth.interfaces
 
 ldap_config = (zope.app.appsetup.product.getProductConfiguration('zeit.ldap')
                or {})
@@ -49,3 +47,39 @@ def ldapPluginFactory():
     ldap.idAttribute = unicode(ldap_config.get('id-attribute', ''), 'utf8')
     ldap.titleAttribute = ldap_config.get('title-attribute')
     return ldap
+
+
+class PrincipalRegistryAuthenticator(object):
+    """An authentication plugin that looks up users from the PrincipalRegistry.
+    """
+
+    zope.interface.implements(
+        zope.pluggableauth.interfaces.IAuthenticatorPlugin)
+
+    def authenticateCredentials(self, credentials):
+        if credentials is None:
+            return None
+
+        prinreg = zope.component.getGlobalSiteManager().getUtility(
+            zope.authentication.interfaces.IAuthentication)
+        try:
+            user = prinreg.getPrincipalByLogin(credentials['login'])
+        except KeyError:
+            user = None
+        if user is None:
+            return None
+        if not user.validate(credentials['password']):
+            return None
+
+        return self._principal_info(user)
+
+    def principalInfo(self, id):
+        prinreg = zope.component.getGlobalSiteManager().getUtility(
+            zope.authentication.interfaces.IAuthentication)
+        user = prinreg.getPrincipal(id)
+        if user is not None:
+            return self._principal_info(user)
+
+    def _principal_info(self, user):
+        return ldappas.authentication.PrincipalInfo(
+            user.id, user.getLogin(), user.title, '')
