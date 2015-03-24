@@ -3,6 +3,7 @@ import ldappas.authentication
 import zope.app.appsetup.product
 import zope.authentication.interfaces
 import zope.pluggableauth.interfaces
+import zope.security.interfaces
 
 ldap_config = (zope.app.appsetup.product.getProductConfiguration('zeit.ldap')
                or {})
@@ -77,8 +78,9 @@ class PrincipalRegistryAuthenticator(object):
         prinreg = zope.component.getGlobalSiteManager().getUtility(
             zope.authentication.interfaces.IAuthentication)
         user = prinreg.getPrincipal(id)
-        if user is not None:
-            return self._principal_info(user)
+        if user is None or zope.security.interfaces.IGroup.providedBy(user):
+            return None
+        return self._principal_info(user)
 
     def _principal_info(self, user):
         return ldappas.authentication.PrincipalInfo(
