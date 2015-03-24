@@ -28,23 +28,5 @@
     name="principalregistry"
     />
 
-  <browser:page
-    for="zope.traversing.interfaces.IContainmentRoot"
-    class=".login.Login"
-    permission="zope.Public"
-    name="loginForm.html"
-    template="login.pt"
-    layer="zeit.cms.browser.interfaces.ICMSLayer"
-    />
-
-  <browser:page
-    for="zope.traversing.interfaces.IContainmentRoot"
-    class=".login.Logout"
-    permission="zope.Public"
-    name="logout.html"
-    layer="zeit.cms.browser.interfaces.ICMSLayer"
-    />
-
-
 </configure>
 
