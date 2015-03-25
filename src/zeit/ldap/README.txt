@@ -15,7 +15,7 @@ authentication utility is registered and configured for using ldap[1]_:
 The authentication uses the ldap plugin:
 
 >>> pas.authenticatorPlugins
-('ldap',)
+('ldap', 'principalregistry')
 >>> plugins = list(pas.getAuthenticatorPlugins())
 >>> plugins
 [('ldap', <zeit.ldap.authentication.LDAPAuthentication object at 0x...>)]
