@@ -13,6 +13,12 @@ def install(root):
         'authentication',
         zope.authentication.interfaces.IAuthentication)
     auth.authenticatorPlugins = ('ldap', 'principalregistry')
+    # Note: XML-RPC requires Basic Auth, which works because the xmlrpc-views
+    # are called via URL "/", so a first authentication attempt happens
+    # *before* traversal, using the IAuthentication utility from
+    # zope.principalregistry (which uses Basic Auth), which is non-persistent,
+    # and thus registered at zope.component.getGlobalSiteManager(). The PAU is
+    # used only *after* traversal (and then uses form-based authentication).
     auth.credentialsPlugins = (
         'No Challenge if Authenticated',
         'Session Credentials')
