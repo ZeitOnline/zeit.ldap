@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.2.2 (unreleased)
+1.3.0 (2015-03-26)
 ------------------
 
 - Switch from basic auth to login form (DEV-7).

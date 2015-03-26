@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='zeit.ldap',
-    version='1.2.2dev',
+    version='1.3.0',
     author='gocept, Zeit Online',
     author_email='zon-backend@zeit.de',
     description="Zope3 LDAP interface",
