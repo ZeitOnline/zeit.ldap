@@ -12,7 +12,15 @@ def install(root):
         zope.pluggableauth.authentication.PluggableAuthentication,
         'authentication',
         zope.authentication.interfaces.IAuthentication)
-    auth.authenticatorPlugins = ('ldap', 'principalregistry')
+
+    auth['principalfolder'] = \
+        zope.pluggableauth.plugins.principalfolder.PrincipalFolder()
+
+    auth.authenticatorPlugins = (
+        'ldap',
+        'principalregistry',
+        'principalfolder'
+    )
     # Note: XML-RPC requires Basic Auth, which works because the xmlrpc-views
     # are called via URL "/", so a first authentication attempt happens
     # *before* traversal, using the IAuthentication utility from
@@ -21,7 +29,8 @@ def install(root):
     # used only *after* traversal (and then uses form-based authentication).
     auth.credentialsPlugins = (
         'No Challenge if Authenticated',
-        'Session Credentials')
+        'Session Credentials'
+    )
 
 
 def evolve(context):
