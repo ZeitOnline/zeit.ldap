@@ -18,8 +18,11 @@ def install(root):
 
     auth.authenticatorPlugins = (
         'ldap',
+        'principalfolder',
+        # Since zope.principalregistry raise PrincipalLookupError instead of
+        # returning None (thus continuing to the next plugin), it must come
+        # last in the list.
         'principalregistry',
-        'principalfolder'
     )
     # Note: XML-RPC requires Basic Auth, which works because the xmlrpc-views
     # are called via URL "/", so a first authentication attempt happens
@@ -29,7 +32,7 @@ def install(root):
     # used only *after* traversal (and then uses form-based authentication).
     auth.credentialsPlugins = (
         'No Challenge if Authenticated',
-        'Session Credentials'
+        'Session Credentials',
     )
 
 
