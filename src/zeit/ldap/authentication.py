@@ -1,3 +1,5 @@
+from ldapadapter.interfaces import ServerDown, InvalidCredentials, NoSuchObject
+import ldap.filter
 import ldapadapter.utility
 import ldappas.authentication
 import zope.app.appsetup.product
@@ -21,12 +23,59 @@ def ldapAdapterFactory():
 class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
     def authenticateCredentials(self, credentials):
+        """copy&paste from ldappas to implement custom filter string."""
+
         if not isinstance(credentials, dict):
             return None
+        # wosc: We PATCHED this line:
+        # if not ('login' in credentials and 'password' in credentials):
         if not credentials.get('password'):
             return None
-        return super(LDAPAuthentication, self).authenticateCredentials(
-            credentials)
+
+        da = self.getLDAPAdapter()
+        if da is None:
+            return None
+
+        login = credentials['login']
+        password = credentials['password']
+
+        # Search for a matching entry.
+        try:
+            conn = da.connect()
+        except ServerDown:
+            return None
+        # wosc: We PATCHED this line:
+        # filter = ldap.filter.filter_format(
+        #   '(%s=%s)', (self.loginAttribute, login))
+        filter = self.filterQuery.format(
+            login=ldap.filter.escape_filter_chars(login))
+        try:
+            res = conn.search(self.searchBase, self.searchScope, filter=filter)
+        except NoSuchObject:
+            return None
+        if len(res) != 1:
+            # Search returned no result or too many.
+            return None
+        dn, entry = res[0]
+
+        # Find the id we'll return.
+        id_attr = self.idAttribute
+        if id_attr == 'dn':
+            id = dn
+        elif entry.get(id_attr):
+            id = entry[id_attr][0]
+        else:
+            return None
+        id = self.principalIdPrefix + id
+
+        # Check authentication.
+        try:
+            conn = da.connect(dn, password)
+        except (ServerDown, InvalidCredentials):
+            return None
+
+        return ldappas.authentication.PrincipalInfo(
+            id, **self.getInfoFromEntry(dn, entry))
 
     def getInfoFromEntry(self, dn, entry):
         info = super(LDAPAuthentication, self).getInfoFromEntry(dn, entry)
@@ -47,6 +96,7 @@ def ldapPluginFactory():
                                   'utf8')
     ldap.idAttribute = unicode(ldap_config.get('id-attribute', ''), 'utf8')
     ldap.titleAttribute = ldap_config.get('title-attribute')
+    ldap.filterQuery = unicode(ldap_config.get('filter-query', ''), 'utf8')
     return ldap
 
 
