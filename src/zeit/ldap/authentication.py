@@ -7,8 +7,8 @@ import zope.authentication.interfaces
 import zope.pluggableauth.interfaces
 import zope.security.interfaces
 
-ldap_config = (zope.app.appsetup.product.getProductConfiguration('zeit.ldap')
-               or {})
+ldap_config = (
+    zope.app.appsetup.product.getProductConfiguration('zeit.ldap') or {})
 
 
 def ldapAdapterFactory():
