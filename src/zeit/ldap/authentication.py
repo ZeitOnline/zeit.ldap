@@ -1,4 +1,5 @@
 from ldapadapter.interfaces import ServerDown, InvalidCredentials, NoSuchObject
+from zeit.cms.application import CONFIG_CACHE
 import ldap.filter
 import ldapadapter.utility
 import ldappas.authentication
@@ -84,6 +85,10 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
         except (KeyError, IndexError):
             pass
         return info
+
+    @CONFIG_CACHE.cache_on_arguments()
+    def principalInfo(self, id):
+        return super(LDAPAuthentication, self).principalInfo(id)
 
 
 def ldapPluginFactory():

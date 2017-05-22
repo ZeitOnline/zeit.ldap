@@ -4,7 +4,7 @@ zeit.ldap changes
 1.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- BUG-214: Cache principal info
 
 
 1.4.0 (2015-11-30)
