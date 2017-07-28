@@ -30,12 +30,15 @@ def ldapAdapterFactory():
 
 
 class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
+    # XXX Since the superclass is rather badly factored, we've had to
+    # copy&paste most of it, sigh.
 
-    def _searchPrincipal(self, conn, filter):
+    def _searchPrincipal(self, conn, filter, attrs=None):
         res = []
         for base in self.searchBases:
             try:
-                res = conn.search(base, self.searchScope, filter=filter)
+                res = conn.search(
+                    base, self.searchScope, filter=filter, attrs=attrs)
             except NoSuchObject:
                 continue
             if res:
@@ -130,6 +133,48 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
         return ldappas.authentication.PrincipalInfo(
             id, **self.getInfoFromEntry(dn, entry))
+
+    def search(self, query, start=None, batch_size=None):
+        """See zope.app.authentication.interfaces.IQuerySchemaSearch."""
+        da = self.getLDAPAdapter()
+        if da is None:
+            return ()
+        try:
+            conn = da.connect()
+        except ServerDown:
+            return ()
+
+        # Build the filter based on the query
+        filter_elems = []
+        for key, value in query.items():
+            if not value:
+                continue
+            filter_elems.append(ldap.filter.filter_format(
+                '(%s=*%s*)', (key, value)))
+        filter = ''.join(filter_elems)
+        if len(filter_elems) > 1:
+            filter = '(&%s)' % filter
+
+        if not filter:
+            filter = '(objectClass=*)'
+
+        # wosc: PATCHED to support multiple search bases
+        res = self._searchPrincipal(conn, filter, attrs=[self.idAttribute])
+
+        prefix = self.principalIdPrefix
+        infos = []
+        for dn, entry in res:
+            try:
+                infos.append(prefix + entry[self.idAttribute][0])
+            except (KeyError, IndexError):
+                pass
+
+        if start is None:
+            start = 0
+        if batch_size is not None:
+            return infos[start:start + batch_size]
+        else:
+            return infos[start:]
 
 
 def ldapPluginFactory():
