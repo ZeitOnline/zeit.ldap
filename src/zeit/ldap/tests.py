@@ -15,7 +15,7 @@ class FakeLdap(object):
         # Accept everything
         return self
 
-    def search(self, base, scope, filter):
+    def search(self, base, scope, filter, **kw):
         dn = 'mydn'
         entry = {'login': ['foo'], 'mail': ['test@example.com']}
         return [(dn, entry)]
