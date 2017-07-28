@@ -31,6 +31,14 @@ def ldapAdapterFactory():
 
 class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
+    def _searchPrincipal(self, conn, filter):
+        res = []
+        try:
+            res = conn.search(self.searchBase, self.searchScope, filter=filter)
+        except NoSuchObject:
+            pass
+        return res
+
     def authenticateCredentials(self, credentials):
         """copy&paste from ldappas to implement custom filter string."""
 
@@ -58,10 +66,7 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
         #   '(%s=%s)', (self.loginAttribute, login))
         filter = self.filterQuery.format(
             login=ldap.filter.escape_filter_chars(login))
-        try:
-            res = conn.search(self.searchBase, self.searchScope, filter=filter)
-        except NoSuchObject:
-            return None
+        res = self._searchPrincipal(conn, filter)
         if len(res) != 1:
             # Search returned no result or too many.
             return None
