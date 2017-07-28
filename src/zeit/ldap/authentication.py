@@ -104,7 +104,32 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
     @CONFIG_CACHE.cache_on_arguments()
     def principalInfo(self, id):
-        return super(LDAPAuthentication, self).principalInfo(id)
+        """See zope.app.authentication.interfaces.IAuthenticatorPlugin."""
+        if not id.startswith(self.principalIdPrefix):
+            return None
+        internal_id = id[len(self.principalIdPrefix):]
+
+        da = self.getLDAPAdapter()
+        if da is None:
+            return None
+
+        # Search for a matching entry.
+        try:
+            conn = da.connect()
+        except ServerDown:
+            return None
+        # wosc: PATCHED to support multiple search bases
+        filter = u'(%s=%s)' % (
+            self.idAttribute, ldap.filter.escape_filter_chars(internal_id))
+        res = self._searchPrincipal(conn, filter)
+        # end PATCH
+        if len(res) != 1:
+            # Search returned no result or too many.
+            return self._groupPrincipalInfo(conn, id, internal_id)
+        dn, entry = res[0]
+
+        return ldappas.authentication.PrincipalInfo(
+            id, **self.getInfoFromEntry(dn, entry))
 
 
 def ldapPluginFactory():
