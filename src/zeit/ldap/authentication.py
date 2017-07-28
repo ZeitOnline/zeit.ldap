@@ -12,10 +12,18 @@ ldap_config = (
     zope.app.appsetup.product.getProductConfiguration('zeit.ldap') or {})
 
 
+class LDAPAdapter(ldapadapter.utility.LDAPAdapter):
+
+    def getServerURL(self):
+        # Overwritten so we can pass in a full URI, or even multiple
+        # space-separated URIs, see
+        # <https://mail.python.org/pipermail/python-ldap/2014q2/003370.html>
+        return self.host
+
+
 def ldapAdapterFactory():
-    adapter = ldapadapter.utility.LDAPAdapter(
+    adapter = LDAPAdapter(
         host=ldap_config.get('host', 'localhost'),
-        port=int(ldap_config.get('port', '389')),
         bindDN=unicode(ldap_config.get('bind-dn', ''), 'utf8'),
         bindPassword=unicode(ldap_config.get('bind-password', ''), 'utf8'))
     return adapter

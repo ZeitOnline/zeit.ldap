@@ -4,7 +4,8 @@ zeit.ldap changes
 1.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- MAINT: Support configuring multiple ldap servers (they are tried in
+  order by the underlying python-ldap/OpenLDAP library)
 
 
 1.4.1 (2017-07-18)
