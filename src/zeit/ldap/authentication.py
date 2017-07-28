@@ -33,10 +33,13 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
     def _searchPrincipal(self, conn, filter):
         res = []
-        try:
-            res = conn.search(self.searchBase, self.searchScope, filter=filter)
-        except NoSuchObject:
-            pass
+        for base in self.searchBases:
+            try:
+                res = conn.search(base, self.searchScope, filter=filter)
+            except NoSuchObject:
+                continue
+            if res:
+                break
         return res
 
     def authenticateCredentials(self, credentials):
@@ -108,7 +111,8 @@ def ldapPluginFactory():
     ldap = LDAPAuthentication()
     ldap.principalIdPrefix = 'ldap.'
     ldap.adapterName = 'zeit.ldapconnection'
-    ldap.searchBase = unicode(ldap_config.get('search-base', ''), 'utf8')
+    ldap.searchBases = unicode(
+        ldap_config.get('search-base', ''), 'utf8').split(' ')
     ldap.searchScope = unicode(ldap_config.get('search-scope', ''), 'utf8')
     ldap.loginAttribute = unicode(ldap_config.get('login-attribute', ''),
                                   'utf8')
