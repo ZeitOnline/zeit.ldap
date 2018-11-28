@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.4.4 (unreleased)
+1.4.4 (2018-11-28)
 ------------------
 
 - PERF: Cache authentication result
