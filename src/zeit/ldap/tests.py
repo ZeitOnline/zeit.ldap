@@ -1,8 +1,9 @@
-import unittest
-import zope.component
 import ldapadapter.interfaces
+import pyramid_dogpile_cache2
+import unittest
 import zeit.cms.testing
 import zeit.ldap.authentication
+import zope.component
 
 
 LDAPLayer = zeit.cms.testing.ZCMLLayer(
@@ -33,6 +34,11 @@ class AuthenticationTest(unittest.TestCase):
             name=self.auth.adapterName)
         self.auth.idAttribute = 'dn'
         self.auth.loginAttribute = 'login'
+        pyramid_dogpile_cache2.configure_dogpile_cache({
+            'dogpile_cache.backend': 'dogpile.cache.memory',
+            'dogpile_cache.regions': 'config',
+            'dogpile_cache.config.expiration_time': 0
+        })
 
     def tearDown(self):
         gsm = zope.component.getGlobalSiteManager()

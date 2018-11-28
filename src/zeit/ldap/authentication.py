@@ -45,6 +45,7 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
                 break
         return res
 
+    @CONFIG_CACHE.cache_on_arguments()
     def authenticateCredentials(self, credentials):
         """copy&paste from ldappas to implement custom filter string."""
 
