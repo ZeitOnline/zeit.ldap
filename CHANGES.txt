@@ -4,7 +4,7 @@ zeit.ldap changes
 1.4.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ZON-4084: Update dependencies to monorepo
 
 
 1.4.4 (2018-11-28)

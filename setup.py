@@ -17,7 +17,7 @@ setup(
         'ldapadapter>=0.7dev-r82228',
         'ldappas>0.6',
         'setuptools',
-        'zeit.cms>1.4',
+        'vivi.core',
         'zope.app.securitypolicy',
         'zope.app.zcmlfiles',
         'zope.securitypolicy',
