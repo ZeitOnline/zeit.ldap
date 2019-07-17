@@ -2,8 +2,12 @@
 Zeit LDAP
 =========
 
+>>> import zope.component.hooks
+>>> old_site = zope.component.hooks.getSite()
+>>> zope.component.hooks.setSite(getRootFolder())
+
 The `zeit.ldap` package connects the cms to an LDAP or ADS server. A pluggable
-authentication utility is registered and configured for using ldap[1]_:
+authentication utility is registered and configured for using ldap:
 
 >>> import zope.component
 >>> import zope.app.security.interfaces
@@ -23,17 +27,9 @@ The authentication uses the ldap plugin:
 >>> ldap
 <zeit.ldap.authentication.LDAPAuthentication object at 0x...>
 
-
-So the ldap is basically configured correctly[2]_.
-
-
-.. [1]  We need to set the site here:
-
-    >>> import zope.app.component.hooks
-    >>> old_site = zope.app.component.hooks.getSite()
-    >>> zope.app.component.hooks.setSite(getRootFolder())
+So the ldap is basically configured correctly.
 
 
-.. [2] Cleanup
+Cleanup:
 
-    >>> zope.app.component.hooks.setSite(old_site)
+>>> zope.component.hooks.setSite(old_site)
