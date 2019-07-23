@@ -6,8 +6,8 @@ import zeit.ldap.authentication
 import zope.component
 
 
-LDAPLayer = zeit.cms.testing.ZCMLLayer(
-    'ftesting.zcml', product_config=zeit.cms.testing.cms_product_config)
+ZCML_LAYER = zeit.cms.testing.ZCMLLayer(bases=(zeit.cms.testing.CONFIG_LAYER,))
+ZOPE_LAYER = zeit.cms.testing.ZopeLayer(bases=(ZCML_LAYER,))
 
 
 class FakeLdap(object):
@@ -65,6 +65,6 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(zeit.cms.testing.FunctionalDocFileSuite(
         'README.txt',
-        layer=LDAPLayer))
+        layer=ZOPE_LAYER))
     suite.addTest(unittest.makeSuite(AuthenticationTest))
     return suite
