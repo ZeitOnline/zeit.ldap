@@ -36,8 +36,9 @@ class AuthenticationTest(unittest.TestCase):
         self.auth.loginAttribute = 'login'
         pyramid_dogpile_cache2.configure_dogpile_cache({
             'dogpile_cache.backend': 'dogpile.cache.memory',
-            'dogpile_cache.regions': 'config',
-            'dogpile_cache.config.expiration_time': 0
+            'dogpile_cache.regions': 'config, feature',
+            'dogpile_cache.config.expiration_time': 0,
+            'dogpile_cache.feature.expiration_time': 15,
         })
 
     def tearDown(self):
