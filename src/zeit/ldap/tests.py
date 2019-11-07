@@ -1,8 +1,8 @@
-import ldapadapter.interfaces
 import pyramid_dogpile_cache2
 import unittest
 import zeit.cms.testing
 import zeit.ldap.authentication
+import zeit.ldap.connection
 import zope.component
 
 
@@ -30,7 +30,7 @@ class AuthenticationTest(unittest.TestCase):
         self.fake_ldap = FakeLdap()
         self.auth = zeit.ldap.authentication.ldapPluginFactory()
         gsm.registerUtility(
-            self.fake_ldap, ldapadapter.interfaces.ILDAPAdapter,
+            self.fake_ldap, zeit.ldap.connection.ILDAPAdapter,
             name=self.auth.adapterName)
         self.auth.idAttribute = 'dn'
         self.auth.loginAttribute = 'login'
@@ -44,7 +44,7 @@ class AuthenticationTest(unittest.TestCase):
     def tearDown(self):
         gsm = zope.component.getGlobalSiteManager()
         gsm.unregisterUtility(
-            self.fake_ldap, ldapadapter.interfaces.ILDAPAdapter,
+            self.fake_ldap, zeit.ldap.connection.ILDAPAdapter,
             name=self.auth.adapterName)
         super(AuthenticationTest, self).tearDown()
 

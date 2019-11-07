@@ -2,8 +2,6 @@
   xmlns="http://namespaces.zope.org/zope"
   xmlns:browser="http://namespaces.zope.org/browser">
 
-  <include package="ldapadapter" />
-
   <utility
     name="zeit.ldap"
     provides="zope.app.generations.interfaces.ISchemaManager"
@@ -11,9 +9,9 @@
     />
 
   <utility
-    provides="ldapadapter.interfaces.ILDAPAdapter"
+    provides=".connection.ILDAPAdapter"
     name="zeit.ldapconnection"
-    factory=".authentication.ldapAdapterFactory"
+    factory=".connection.ldapAdapterFactory"
     />
 
   <utility

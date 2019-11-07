@@ -1,34 +1,12 @@
-from ldapadapter.interfaces import ServerDown, InvalidCredentials, NoSuchObject
 from zeit.cms.application import CONFIG_CACHE
+from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 import ldap.filter
-import ldapadapter.interfaces
-import ldapadapter.utility
 import persistent
+import zeit.ldap.connection
 import zope.app.appsetup.product
-import zope.pluggableauth.interfaces
 import zope.container.contained
 import zope.pluggableauth.interfaces
 import zope.security.interfaces
-
-ldap_config = (
-    zope.app.appsetup.product.getProductConfiguration('zeit.ldap') or {})
-
-
-class LDAPAdapter(ldapadapter.utility.LDAPAdapter):
-
-    def getServerURL(self):
-        # Overwritten so we can pass in a full URI, or even multiple
-        # space-separated URIs, see
-        # <https://mail.python.org/pipermail/python-ldap/2014q2/003370.html>
-        return self.host
-
-
-def ldapAdapterFactory():
-    adapter = LDAPAdapter(
-        host=ldap_config.get('host', 'localhost'),
-        bindDN=unicode(ldap_config.get('bind-dn', ''), 'utf8'),
-        bindPassword=unicode(ldap_config.get('bind-password', ''), 'utf8'))
-    return adapter
 
 
 class PrincipalInfo(object):
@@ -67,7 +45,7 @@ class LDAPAuthentication(persistent.Persistent,
 
     def getLDAPAdapter(self):
         return zope.component.queryUtility(
-            ldapadapter.interfaces.ILDAPAdapter, name=self.adapterName)
+            zeit.ldap.connection.ILDAPAdapter, name=self.adapterName)
 
     def _searchPrincipal(self, conn, filter, attrs=None):
         res = []
@@ -240,17 +218,17 @@ class LDAPAuthentication(persistent.Persistent,
 
 
 def ldapPluginFactory():
+    config = zope.app.appsetup.product.getProductConfiguration(
+        'zeit.ldap') or {}
     ldap = LDAPAuthentication()
     ldap.principalIdPrefix = 'ldap.'
     ldap.adapterName = 'zeit.ldapconnection'
-    ldap.searchBases = unicode(
-        ldap_config.get('search-base', ''), 'utf8').split(' ')
-    ldap.searchScope = unicode(ldap_config.get('search-scope', ''), 'utf8')
-    ldap.loginAttribute = unicode(ldap_config.get('login-attribute', ''),
-                                  'utf8')
-    ldap.idAttribute = unicode(ldap_config.get('id-attribute', ''), 'utf8')
-    ldap.titleAttribute = ldap_config.get('title-attribute')
-    ldap.filterQuery = unicode(ldap_config.get('filter-query', ''), 'utf8')
+    ldap.searchBases = unicode(config.get('search-base', ''), 'utf8').split(' ')
+    ldap.searchScope = unicode(config.get('search-scope', ''), 'utf8')
+    ldap.loginAttribute = unicode(config.get('login-attribute', ''), 'utf8')
+    ldap.idAttribute = unicode(config.get('id-attribute', ''), 'utf8')
+    ldap.titleAttribute = config.get('title-attribute')
+    ldap.filterQuery = unicode(config.get('filter-query', ''), 'utf8')
     return ldap
 
 

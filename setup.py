@@ -14,13 +14,16 @@ setup(
     license='BSD',
     namespace_packages=['zeit'],
     install_requires=[
+        'python-ldap',
         'persistent',
         'setuptools',
         'vivi.core',
-        'zope.container',
         'zope.app.securitypolicy',
         'zope.app.zcmlfiles',
+        'zope.container',
+        'zope.component',
+        'zope.interface',
+        'zope.pluggableauth',
         'zope.securitypolicy',
-        'zope.testing',
     ],
 )
