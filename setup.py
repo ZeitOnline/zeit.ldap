@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='zeit.ldap',
-    version='1.4.6.dev0',
+    version='1.5.0.dev0',
     author='gocept, Zeit Online',
     author_email='zon-backend@zeit.de',
     description="Zope3 LDAP interface",
@@ -14,7 +14,7 @@ setup(
     license='BSD',
     namespace_packages=['zeit'],
     install_requires=[
-        'python-ldap',
+        'python-ldap >= 3.0.0.dev0',
         'persistent',
         'setuptools',
         'vivi.core',

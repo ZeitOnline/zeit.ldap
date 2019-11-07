@@ -1,4 +1,5 @@
 import ldap
+import sys
 import zope.app.appsetup.product
 import zope.interface
 
@@ -12,10 +13,6 @@ SCOPES = {
 
 def convertScope(scope):
     return SCOPES[scope]
-
-
-def valuesToUTF8(values):
-    return [v.encode('utf-8') for v in values]
 
 
 class ILDAPAdapter(zope.interface.Interface):
@@ -34,12 +31,11 @@ class NoSuchObject(Exception):
     """The base object doesn't exist"""
 
 
+@zope.interface.implementer(ILDAPAdapter)
 class LDAPAdapter(object):
 
-    zope.interface.implements(ILDAPAdapter)
-
     def __init__(self, host='localhost', port=389, useSSL=False,
-                 bindDN='', bindPassword=''):
+                 bindDN=u'', bindPassword=u''):
         self.host = host
         self.port = port
         self.useSSL = useSSL
@@ -48,7 +44,7 @@ class LDAPAdapter(object):
 
     def connect(self, dn=None, password=None):
         conn_str = self.getServerURL()
-        conn = ldap.initialize(conn_str)
+        conn = ldap.initialize(conn_str, bytes_mode=False)
         try:
             conn.set_option(ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3)
         except ldap.LDAPError:
@@ -56,14 +52,11 @@ class LDAPAdapter(object):
             # are then not utf-8 encoded (charset is implicit (?))
             raise Exception("Server should be LDAP v3")
         # TODO: conn.set_option(OPT_REFERRALS, 1)
-        # if dn is unicode, automatically convert dn to UTF-8 byte string
-        if isinstance(dn, unicode):
-            dn = dn.encode('utf-8')
 
         # Bind the connection to the dn
         if dn is None:
-            dn = self.bindDN or ''
-            password = self.bindPassword or ''
+            dn = self.bindDN or u''
+            password = self.bindPassword or u''
         try:
             conn.simple_bind_s(dn, password)
         except ldap.SERVER_DOWN:
@@ -90,20 +83,16 @@ class LDAPConnection(object):
     def __init__(self, conn):
         self.conn = conn
 
-    def add(self, dn, entry, encode=True):
+    def add(self, dn, entry):
         attrs_list = []
         for key, values in entry.items():
-            key = str(key)
-            if encode:
-                attrs_list.append((key, valuesToUTF8(values)))
-            else:
-                attrs_list.append((key, values))
-        self.conn.add_s(dn.encode('utf-8'), attrs_list)
+            attrs_list.append((key, values))
+        self.conn.add_s(dn, attrs_list)
 
     def delete(self, dn):
-        self.conn.delete_s(dn.encode('utf-8'))
+        self.conn.delete_s(dn)
 
-    def modify(self, dn, entry, encode=True):
+    def modify(self, dn, entry):
         # Get current entry
         res = self.search(dn, 'base')
         if not res:
@@ -119,30 +108,19 @@ class LDAPConnection(object):
                     mod_list.append((ldap.MOD_DELETE, key, None))
                 elif cur_entry[key] != values:
                     # TODO treat modrdn
-                    if encode:
-                        mod_list.append((ldap.MOD_REPLACE, key,
-                                         valuesToUTF8(values)))
-                    else:
-                        mod_list.append((ldap.MOD_REPLACE, key,
-                                         values))
+                    mod_list.append((ldap.MOD_REPLACE, key, values))
             else:
                 if values != []:
-                    if encode:
-                        mod_list.append((ldap.MOD_ADD, key,
-                                         valuesToUTF8(values)))
-                    else:
-                        mod_list.append((ldap.MOD_ADD, key, values))
+                    mod_list.append((ldap.MOD_ADD, key, values))
         if not mod_list:
             return
 
-        self.conn.modify_s(dn.encode('utf-8'), mod_list)
+        self.conn.modify_s(dn, mod_list)
 
-    def search(self, base, scope='sub', filter='(objectClass=*)',
+    def search(self, base, scope=u'sub', filter=u'(objectClass=*)',
                attrs=None):
         # Convert from unicode to UTF-8, and attrs must be ASCII strings.
-        base = base.encode('utf-8')
         scope = convertScope(scope)
-        filter = filter.encode('utf-8')
         if attrs is not None:
             attrs = [str(attr) for attr in attrs]
         try:
@@ -154,12 +132,11 @@ class LDAPConnection(object):
         # Convert returned values from utf-8 to unicode.
         results = []
         for dn, entry in ldap_entries:
-            dn = unicode(dn, 'utf-8')
             for key, values in entry.items():
                 # TODO: Can key be non-ascii? Check LDAP spec.
                 # FIXME: there may be non-textual binary values.
                 try:
-                    values[:] = [unicode(v, 'utf-8') for v in values]
+                    values[:] = [v.decode('utf-8') for v in values]
                 except (UnicodeDecodeError, TypeError):
                     # Not all data is unicode, so decoding does not always work
                     pass
@@ -171,7 +148,13 @@ def ldapAdapterFactory():
     config = zope.app.appsetup.product.getProductConfiguration(
         'zeit.ldap') or {}
     adapter = LDAPAdapter(
-        host=config.get('host', 'localhost'),
-        bindDN=unicode(config.get('bind-dn', ''), 'utf8'),
-        bindPassword=unicode(config.get('bind-password', ''), 'utf8'))
+        host=ensure_text(config.get('host', 'localhost')),
+        bindDN=ensure_text(config.get('bind-dn', u'')),
+        bindPassword=ensure_text(config.get('bind-password', u'')))
     return adapter
+
+
+def ensure_text(value):
+    if sys.version_info >= (3,):
+        return value
+    return value.decode('utf-8') if value is not None else None

@@ -2,6 +2,7 @@ from zeit.cms.application import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 import ldap.filter
 import persistent
+import sys
 import zeit.ldap.connection
 import zope.app.appsetup.product
 import zope.container.contained
@@ -9,9 +10,8 @@ import zope.pluggableauth.interfaces
 import zope.security.interfaces
 
 
+@zope.interface.implementer(zope.pluggableauth.interfaces.IPrincipalInfo)
 class PrincipalInfo(object):
-
-    zope.interface.implements(zope.pluggableauth.interfaces.IPrincipalInfo)
 
     def __init__(self, id, login='', title='', description=''):
         self.id = id
@@ -24,24 +24,23 @@ class PrincipalInfo(object):
 
 
 # copy&paste&tweak from ldappas.authentication
+@zope.interface.implementer(
+    zope.pluggableauth.interfaces.IAuthenticatorPlugin,
+    zope.pluggableauth.interfaces.IQueriableAuthenticator,
+    zope.pluggableauth.interfaces.IQuerySchemaSearch)
 class LDAPAuthentication(persistent.Persistent,
                          zope.container.contained.Contained):
 
-    zope.interface.implements(
-        zope.pluggableauth.interfaces.IAuthenticatorPlugin,
-        zope.pluggableauth.interfaces.IQueriableAuthenticator,
-        zope.pluggableauth.interfaces.IQuerySchemaSearch)
-
-    adapterName = ''
-    searchBase = ''
-    searchScope = ''
-    groupsSearchBase = ''
-    groupsSearchScope = ''
-    loginAttribute = ''
-    principalIdPrefix = ''
-    idAttribute = ''
-    titleAttribute = ''
-    groupIdAttribute = ''
+    adapterName = u''
+    searchBases = [u'']
+    searchScope = u''
+    groupsSearchBase = u''
+    groupsSearchScope = u''
+    loginAttribute = u''
+    principalIdPrefix = u''
+    idAttribute = u''
+    titleAttribute = u''
+    groupIdAttribute = u''
 
     def getLDAPAdapter(self):
         return zope.component.queryUtility(
@@ -163,7 +162,7 @@ class LDAPAuthentication(persistent.Persistent,
                 not self.groupIdAttribute):
             return None
         filter = ldap.filter.filter_format(
-            '(%s=%s)', (self.groupIdAttribute, internal_id))
+            u'(%s=%s)', (self.groupIdAttribute, internal_id))
         try:
             res = conn.search(self.groupsSearchBase, self.groupsSearchScope,
                               filter=filter)
@@ -190,13 +189,13 @@ class LDAPAuthentication(persistent.Persistent,
             if not value:
                 continue
             filter_elems.append(ldap.filter.filter_format(
-                '(%s=*%s*)', (key, value)))
-        filter = ''.join(filter_elems)
+                u'(%s=*%s*)', (key, value)))
+        filter = u''.join(filter_elems)
         if len(filter_elems) > 1:
-            filter = '(&%s)' % filter
+            filter = u'(&%s)' % filter
 
         if not filter:
-            filter = '(objectClass=*)'
+            filter = u'(objectClass=*)'
 
         # wosc: PATCHED to support multiple search bases
         res = self._searchPrincipal(conn, filter, attrs=[self.idAttribute])
@@ -223,21 +222,25 @@ def ldapPluginFactory():
     ldap = LDAPAuthentication()
     ldap.principalIdPrefix = 'ldap.'
     ldap.adapterName = 'zeit.ldapconnection'
-    ldap.searchBases = unicode(config.get('search-base', ''), 'utf8').split(' ')
-    ldap.searchScope = unicode(config.get('search-scope', ''), 'utf8')
-    ldap.loginAttribute = unicode(config.get('login-attribute', ''), 'utf8')
-    ldap.idAttribute = unicode(config.get('id-attribute', ''), 'utf8')
-    ldap.titleAttribute = config.get('title-attribute')
-    ldap.filterQuery = unicode(config.get('filter-query', ''), 'utf8')
+    ldap.searchBases = ensure_text(config.get('search-base', u'')).split(' ')
+    ldap.searchScope = ensure_text(config.get('search-scope', u''))
+    ldap.loginAttribute = ensure_text(config.get('login-attribute', u''))
+    ldap.idAttribute = ensure_text(config.get('id-attribute', u''))
+    ldap.titleAttribute = ensure_text(config.get('title-attribute'))
+    ldap.filterQuery = ensure_text(config.get('filter-query', u''))
     return ldap
 
 
+def ensure_text(value):
+    if sys.version_info >= (3,):
+        return value
+    return value.decode('utf-8') if value is not None else None
+
+
+@zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
 class PrincipalRegistryAuthenticator(object):
     """An authentication plugin that looks up users from the PrincipalRegistry.
     """
-
-    zope.interface.implements(
-        zope.pluggableauth.interfaces.IAuthenticatorPlugin)
 
     def authenticateCredentials(self, credentials):
         if credentials is None:
