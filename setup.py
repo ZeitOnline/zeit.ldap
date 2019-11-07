@@ -14,10 +14,10 @@ setup(
     license='BSD',
     namespace_packages=['zeit'],
     install_requires=[
-        'ldapadapter>=0.7dev-r82228',
-        'ldappas>0.6',
+        'persistent',
         'setuptools',
         'vivi.core',
+        'zope.container',
         'zope.app.securitypolicy',
         'zope.app.zcmlfiles',
         'zope.securitypolicy',

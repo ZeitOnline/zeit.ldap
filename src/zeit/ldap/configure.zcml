@@ -3,7 +3,6 @@
   xmlns:browser="http://namespaces.zope.org/browser">
 
   <include package="ldapadapter" />
-  <include package="ldappas" />
 
   <utility
     name="zeit.ldap"

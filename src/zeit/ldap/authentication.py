@@ -1,10 +1,12 @@
 from ldapadapter.interfaces import ServerDown, InvalidCredentials, NoSuchObject
 from zeit.cms.application import CONFIG_CACHE
 import ldap.filter
+import ldapadapter.interfaces
 import ldapadapter.utility
-import ldappas.authentication
+import persistent
 import zope.app.appsetup.product
-import zope.authentication.interfaces
+import zope.pluggableauth.interfaces
+import zope.container.contained
 import zope.pluggableauth.interfaces
 import zope.security.interfaces
 
@@ -29,9 +31,43 @@ def ldapAdapterFactory():
     return adapter
 
 
-class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
-    # XXX Since the superclass is rather badly factored, we've had to
-    # copy&paste most of it, sigh.
+class PrincipalInfo(object):
+
+    zope.interface.implements(zope.pluggableauth.interfaces.IPrincipalInfo)
+
+    def __init__(self, id, login='', title='', description=''):
+        self.id = id
+        self.login = login
+        self.title = title
+        self.description = description
+
+    def __repr__(self):
+        return 'PrincipalInfo(%r)' % self.id
+
+
+# copy&paste&tweak from ldappas.authentication
+class LDAPAuthentication(persistent.Persistent,
+                         zope.container.contained.Contained):
+
+    zope.interface.implements(
+        zope.pluggableauth.interfaces.IAuthenticatorPlugin,
+        zope.pluggableauth.interfaces.IQueriableAuthenticator,
+        zope.pluggableauth.interfaces.IQuerySchemaSearch)
+
+    adapterName = ''
+    searchBase = ''
+    searchScope = ''
+    groupsSearchBase = ''
+    groupsSearchScope = ''
+    loginAttribute = ''
+    principalIdPrefix = ''
+    idAttribute = ''
+    titleAttribute = ''
+    groupIdAttribute = ''
+
+    def getLDAPAdapter(self):
+        return zope.component.queryUtility(
+            ldapadapter.interfaces.ILDAPAdapter, name=self.adapterName)
 
     def _searchPrincipal(self, conn, filter, attrs=None):
         res = []
@@ -95,11 +131,18 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
         except (ServerDown, InvalidCredentials):
             return None
 
-        return ldappas.authentication.PrincipalInfo(
-            id, **self.getInfoFromEntry(dn, entry))
+        return PrincipalInfo(id, **self.getInfoFromEntry(dn, entry))
 
     def getInfoFromEntry(self, dn, entry):
-        info = super(LDAPAuthentication, self).getInfoFromEntry(dn, entry)
+        try:
+            title = entry[self.titleAttribute][0]
+        except (KeyError, IndexError):
+            title = dn
+        info = {
+            'login': entry[self.loginAttribute][0],
+            'title': title,
+            'description': title,
+        }
         try:
             info['description'] = entry['mail'][0]
         except (KeyError, IndexError):
@@ -132,8 +175,26 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
             return self._groupPrincipalInfo(conn, id, internal_id)
         dn, entry = res[0]
 
-        return ldappas.authentication.PrincipalInfo(
-            id, **self.getInfoFromEntry(dn, entry))
+        return PrincipalInfo(id, **self.getInfoFromEntry(dn, entry))
+
+    def _groupPrincipalInfo(self, conn, id, internal_id):
+        """Return PrincipalInfo for a group, if it exists.
+        """
+        if (not self.groupsSearchBase or
+                not self.groupsSearchScope or
+                not self.groupIdAttribute):
+            return None
+        filter = ldap.filter.filter_format(
+            '(%s=%s)', (self.groupIdAttribute, internal_id))
+        try:
+            res = conn.search(self.groupsSearchBase, self.groupsSearchScope,
+                              filter=filter)
+        except NoSuchObject:
+            return None
+        if len(res) != 1:
+            return None
+        dn, entry = res[0]
+        return PrincipalInfo(id)
 
     def search(self, query, start=None, batch_size=None):
         """See zope.app.authentication.interfaces.IQuerySchemaSearch."""
@@ -226,5 +287,4 @@ class PrincipalRegistryAuthenticator(object):
         return self._principal_info(user)
 
     def _principal_info(self, user):
-        return ldappas.authentication.PrincipalInfo(
-            user.id, user.getLogin(), user.title, '')
+        return PrincipalInfo(user.id, user.getLogin(), user.title, '')
