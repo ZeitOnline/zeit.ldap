@@ -1,37 +1,50 @@
-from ldapadapter.interfaces import ServerDown, InvalidCredentials, NoSuchObject
 from zeit.cms.application import CONFIG_CACHE
+from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 import ldap.filter
-import ldapadapter.utility
-import ldappas.authentication
+import persistent
+import sys
+import zeit.ldap.connection
 import zope.app.appsetup.product
-import zope.authentication.interfaces
+import zope.container.contained
 import zope.pluggableauth.interfaces
 import zope.security.interfaces
 
-ldap_config = (
-    zope.app.appsetup.product.getProductConfiguration('zeit.ldap') or {})
+
+@zope.interface.implementer(zope.pluggableauth.interfaces.IPrincipalInfo)
+class PrincipalInfo(object):
+
+    def __init__(self, id, login='', title='', description=''):
+        self.id = id
+        self.login = login
+        self.title = title
+        self.description = description
+
+    def __repr__(self):
+        return 'PrincipalInfo(%r)' % self.id
 
 
-class LDAPAdapter(ldapadapter.utility.LDAPAdapter):
+# copy&paste&tweak from ldappas.authentication
+@zope.interface.implementer(
+    zope.pluggableauth.interfaces.IAuthenticatorPlugin,
+    zope.pluggableauth.interfaces.IQueriableAuthenticator,
+    zope.pluggableauth.interfaces.IQuerySchemaSearch)
+class LDAPAuthentication(persistent.Persistent,
+                         zope.container.contained.Contained):
 
-    def getServerURL(self):
-        # Overwritten so we can pass in a full URI, or even multiple
-        # space-separated URIs, see
-        # <https://mail.python.org/pipermail/python-ldap/2014q2/003370.html>
-        return self.host
+    adapterName = u''
+    searchBases = [u'']
+    searchScope = u''
+    groupsSearchBase = u''
+    groupsSearchScope = u''
+    loginAttribute = u''
+    principalIdPrefix = u''
+    idAttribute = u''
+    titleAttribute = u''
+    groupIdAttribute = u''
 
-
-def ldapAdapterFactory():
-    adapter = LDAPAdapter(
-        host=ldap_config.get('host', 'localhost'),
-        bindDN=unicode(ldap_config.get('bind-dn', ''), 'utf8'),
-        bindPassword=unicode(ldap_config.get('bind-password', ''), 'utf8'))
-    return adapter
-
-
-class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
-    # XXX Since the superclass is rather badly factored, we've had to
-    # copy&paste most of it, sigh.
+    def getLDAPAdapter(self):
+        return zope.component.queryUtility(
+            zeit.ldap.connection.ILDAPAdapter, name=self.adapterName)
 
     def _searchPrincipal(self, conn, filter, attrs=None):
         res = []
@@ -95,11 +108,18 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
         except (ServerDown, InvalidCredentials):
             return None
 
-        return ldappas.authentication.PrincipalInfo(
-            id, **self.getInfoFromEntry(dn, entry))
+        return PrincipalInfo(id, **self.getInfoFromEntry(dn, entry))
 
     def getInfoFromEntry(self, dn, entry):
-        info = super(LDAPAuthentication, self).getInfoFromEntry(dn, entry)
+        try:
+            title = entry[self.titleAttribute][0]
+        except (KeyError, IndexError):
+            title = dn
+        info = {
+            'login': entry[self.loginAttribute][0],
+            'title': title,
+            'description': title,
+        }
         try:
             info['description'] = entry['mail'][0]
         except (KeyError, IndexError):
@@ -132,8 +152,26 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
             return self._groupPrincipalInfo(conn, id, internal_id)
         dn, entry = res[0]
 
-        return ldappas.authentication.PrincipalInfo(
-            id, **self.getInfoFromEntry(dn, entry))
+        return PrincipalInfo(id, **self.getInfoFromEntry(dn, entry))
+
+    def _groupPrincipalInfo(self, conn, id, internal_id):
+        """Return PrincipalInfo for a group, if it exists.
+        """
+        if (not self.groupsSearchBase or
+                not self.groupsSearchScope or
+                not self.groupIdAttribute):
+            return None
+        filter = ldap.filter.filter_format(
+            u'(%s=%s)', (self.groupIdAttribute, internal_id))
+        try:
+            res = conn.search(self.groupsSearchBase, self.groupsSearchScope,
+                              filter=filter)
+        except NoSuchObject:
+            return None
+        if len(res) != 1:
+            return None
+        dn, entry = res[0]
+        return PrincipalInfo(id)
 
     def search(self, query, start=None, batch_size=None):
         """See zope.app.authentication.interfaces.IQuerySchemaSearch."""
@@ -151,13 +189,13 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
             if not value:
                 continue
             filter_elems.append(ldap.filter.filter_format(
-                '(%s=*%s*)', (key, value)))
-        filter = ''.join(filter_elems)
+                u'(%s=*%s*)', (key, value)))
+        filter = u''.join(filter_elems)
         if len(filter_elems) > 1:
-            filter = '(&%s)' % filter
+            filter = u'(&%s)' % filter
 
         if not filter:
-            filter = '(objectClass=*)'
+            filter = u'(objectClass=*)'
 
         # wosc: PATCHED to support multiple search bases
         res = self._searchPrincipal(conn, filter, attrs=[self.idAttribute])
@@ -179,26 +217,30 @@ class LDAPAuthentication(ldappas.authentication.LDAPAuthentication):
 
 
 def ldapPluginFactory():
+    config = zope.app.appsetup.product.getProductConfiguration(
+        'zeit.ldap') or {}
     ldap = LDAPAuthentication()
     ldap.principalIdPrefix = 'ldap.'
     ldap.adapterName = 'zeit.ldapconnection'
-    ldap.searchBases = unicode(
-        ldap_config.get('search-base', ''), 'utf8').split(' ')
-    ldap.searchScope = unicode(ldap_config.get('search-scope', ''), 'utf8')
-    ldap.loginAttribute = unicode(ldap_config.get('login-attribute', ''),
-                                  'utf8')
-    ldap.idAttribute = unicode(ldap_config.get('id-attribute', ''), 'utf8')
-    ldap.titleAttribute = ldap_config.get('title-attribute')
-    ldap.filterQuery = unicode(ldap_config.get('filter-query', ''), 'utf8')
+    ldap.searchBases = ensure_text(config.get('search-base', u'')).split(' ')
+    ldap.searchScope = ensure_text(config.get('search-scope', u''))
+    ldap.loginAttribute = ensure_text(config.get('login-attribute', u''))
+    ldap.idAttribute = ensure_text(config.get('id-attribute', u''))
+    ldap.titleAttribute = ensure_text(config.get('title-attribute'))
+    ldap.filterQuery = ensure_text(config.get('filter-query', u''))
     return ldap
 
 
+def ensure_text(value):
+    if sys.version_info >= (3,):
+        return value
+    return value.decode('utf-8') if value is not None else None
+
+
+@zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
 class PrincipalRegistryAuthenticator(object):
     """An authentication plugin that looks up users from the PrincipalRegistry.
     """
-
-    zope.interface.implements(
-        zope.pluggableauth.interfaces.IAuthenticatorPlugin)
 
     def authenticateCredentials(self, credentials):
         if credentials is None:
@@ -226,5 +268,4 @@ class PrincipalRegistryAuthenticator(object):
         return self._principal_info(user)
 
     def _principal_info(self, user):
-        return ldappas.authentication.PrincipalInfo(
-            user.id, user.getLogin(), user.title, '')
+        return PrincipalInfo(user.id, user.getLogin(), user.title, '')
