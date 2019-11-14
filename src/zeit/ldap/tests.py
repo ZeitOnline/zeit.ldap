@@ -20,7 +20,6 @@ def setup_dogpile_cache():
     })
 
 
-
 class FakeLdap(object):
 
     def connect(self, dn=None, password=None):
