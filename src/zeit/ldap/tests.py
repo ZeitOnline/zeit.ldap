@@ -63,9 +63,6 @@ class AuthenticationTest(unittest.TestCase):
 
 
 def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(zeit.cms.testing.FunctionalDocFileSuite(
+    return zeit.cms.testing.FunctionalDocFileSuite(
         'README.txt',
-        layer=ZOPE_LAYER))
-    suite.addTest(unittest.makeSuite(AuthenticationTest))
-    return suite
+        layer=ZOPE_LAYER)
