@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.5.0 (unreleased)
+1.5.0 (2019-11-21)
 ------------------
 
 - ZON-5241: Make Python-3 compatible
