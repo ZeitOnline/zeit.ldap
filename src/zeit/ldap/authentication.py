@@ -7,7 +7,28 @@ import zeit.ldap.connection
 import zope.app.appsetup.product
 import zope.container.contained
 import zope.pluggableauth.interfaces
+import zope.schema
 import zope.security.interfaces
+
+
+class ILDAPSearchSchema(zope.interface.Interface):
+    """A LDAP-specific schema for searching for principals."""
+
+    uid = zope.schema.TextLine(
+        title=u'uid',
+        required=False)
+
+    cn = zope.schema.TextLine(
+        title=u'cn',
+        required=False)
+
+    givenName = zope.schema.TextLine(
+        title=u'givenName',
+        required=False)
+
+    sn = zope.schema.TextLine(
+        title=u'sn',
+        required=False)
 
 
 @zope.interface.implementer(zope.pluggableauth.interfaces.IPrincipalInfo)
@@ -41,6 +62,8 @@ class LDAPAuthentication(persistent.Persistent,
     idAttribute = u''
     titleAttribute = u''
     groupIdAttribute = u''
+
+    schema = ILDAPSearchSchema
 
     def getLDAPAdapter(self):
         return zope.component.queryUtility(
