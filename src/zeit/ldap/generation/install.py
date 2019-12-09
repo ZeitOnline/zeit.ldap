@@ -1,5 +1,5 @@
+import zeit.cms.generation
 import zeit.cms.generation.install
-import zeit.cms.testing
 import zope.authentication.interfaces
 import zope.pluggableauth.authentication
 
@@ -37,6 +37,4 @@ def install(root):
 
 
 def evolve(context):
-    root = zope.generations.utility.getRootFolder(context)
-    with zeit.cms.testing.site(root):
-        install(root)
+    zeit.cms.generation.do_evolve(context, install)
