@@ -4,7 +4,7 @@ zeit.ldap changes
 1.5.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ZON-5594: Update to changed vivi API
 
 
 1.5.1 (2019-12-06)

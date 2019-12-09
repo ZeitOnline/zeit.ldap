@@ -1,4 +1,4 @@
-from zeit.cms.application import CONFIG_CACHE
+from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 import ldap.filter
 import persistent
