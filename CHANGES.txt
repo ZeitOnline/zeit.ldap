@@ -6,6 +6,8 @@ zeit.ldap changes
 
 - ZON-5594: Update to changed vivi API
 
+- FIX: The ldap library now expects unicode, not bytes
+
 
 1.5.1 (2019-12-06)
 ------------------

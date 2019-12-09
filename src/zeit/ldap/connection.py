@@ -119,10 +119,9 @@ class LDAPConnection(object):
 
     def search(self, base, scope=u'sub', filter=u'(objectClass=*)',
                attrs=None):
-        # Convert from unicode to UTF-8, and attrs must be ASCII strings.
         scope = convertScope(scope)
         if attrs is not None:
-            attrs = [str(attr) for attr in attrs]
+            attrs = [ensure_text(attr) for attr in attrs]
         try:
             ldap_entries = self.conn.search_s(base, scope, filter, attrs)
         except ldap.NO_SUCH_OBJECT:
