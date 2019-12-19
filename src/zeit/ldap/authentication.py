@@ -257,6 +257,8 @@ def ldapPluginFactory():
 def ensure_text(value):
     if sys.version_info >= (3,):
         return value
+    if isinstance(value, unicode):  # noqa
+        return value
     return value.decode('utf-8') if value is not None else None
 
 
