@@ -52,6 +52,13 @@ class LDAPAdapter(object):
             # are then not utf-8 encoded (charset is implicit (?))
             raise Exception("Server should be LDAP v3")
         # TODO: conn.set_option(OPT_REFERRALS, 1)
+        if 'ldaps' in self.host:
+            # XXX Disable certificate validation, as I could not make this work
+            #   conn.set_option(ldap.OPT_X_TLS_CACERTFILE, '/path/to/file')
+            # maybe https://github.com/python-ldap/python-ldap/issues/301 ?
+            conn.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+            # https://github.com/python-ldap/python-ldap/issues/55
+            conn.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
 
         # Bind the connection to the dn
         if dn is None:

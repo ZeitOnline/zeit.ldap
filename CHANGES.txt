@@ -4,7 +4,7 @@ zeit.ldap changes
 1.5.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- MAINT: Support ldaps with self-signed certs by disabling cert validation
 
 
 1.5.4 (2019-12-19)
