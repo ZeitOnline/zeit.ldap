@@ -1,5 +1,6 @@
 import os
 import pyramid_dogpile_cache2
+import sys
 import unittest
 import zeit.cms.testing
 import zeit.ldap.authentication
@@ -86,7 +87,10 @@ class LDAPIntegrationTest(unittest.TestCase):
         super(LDAPIntegrationTest, self).tearDown()
 
     def env(self, key):
-        return os.environ[key].decode('utf-8')
+        value = os.environ[key]
+        if sys.version_info < (3,):
+            value = value.decode('utf-8')
+        return value
 
     def test_authenticate_works(self):
         auth = zeit.ldap.authentication.LDAPAuthentication()
