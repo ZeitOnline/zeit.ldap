@@ -1,5 +1,4 @@
 import os
-import pyramid_dogpile_cache2
 import sys
 import unittest
 import zeit.cms.testing
@@ -12,13 +11,15 @@ ZCML_LAYER = zeit.cms.testing.ZCMLLayer(bases=(zeit.cms.testing.CONFIG_LAYER,))
 ZOPE_LAYER = zeit.cms.testing.ZopeLayer(bases=(ZCML_LAYER,))
 
 
-def setup_dogpile_cache():
-    pyramid_dogpile_cache2.configure_dogpile_cache({
-        'dogpile_cache.backend': 'dogpile.cache.memory',
-        'dogpile_cache.regions': 'config, feature',
-        'dogpile_cache.config.expiration_time': 0,
-        'dogpile_cache.feature.expiration_time': 15,
-    })
+class CacheLayer(zeit.cms.testing.CacheLayer):
+
+    defaultBases = (zeit.cms.testing.CONFIG_LAYER,)
+
+    def setUp(self):
+        zeit.cms.application.configure_dogpile_cache(None)
+
+
+DOGPILE_CACHE_LAYER = CacheLayer()
 
 
 class FakeLdap(object):
@@ -35,9 +36,10 @@ class FakeLdap(object):
 
 class AuthenticationTest(unittest.TestCase):
 
+    layer = DOGPILE_CACHE_LAYER
+
     def setUp(self):
         super(AuthenticationTest, self).setUp()
-        setup_dogpile_cache()
         gsm = zope.component.getGlobalSiteManager()
         self.fake_ldap = FakeLdap()
         self.auth = zeit.ldap.authentication.ldapPluginFactory()
@@ -70,9 +72,10 @@ class AuthenticationTest(unittest.TestCase):
 
 class LDAPIntegrationTest(unittest.TestCase):
 
+    layer = DOGPILE_CACHE_LAYER
+
     def setUp(self):
         super(LDAPIntegrationTest, self).setUp()
-        setup_dogpile_cache()
         gsm = zope.component.getGlobalSiteManager()
         self.ldap = zeit.ldap.connection.LDAPAdapter(
             host=self.env('ZEIT_LDAP_HOST'),
