@@ -6,6 +6,7 @@ import ldap.filter
 import persistent
 import zeit.ldap.connection
 import zope.app.appsetup.product
+import zope.authentication.interfaces
 import zope.container.contained
 import zope.pluggableauth.authentication
 import zope.pluggableauth.interfaces
@@ -268,7 +269,10 @@ class PrincipalRegistryAuthenticator:
         return self._principal_info(user)
 
     def principalInfo(self, id):
-        user = self.registry.getPrincipal(id)
+        try:
+            user = self.registry.getPrincipal(id)
+        except zope.authentication.interfaces.PrincipalLookupError:
+            return None
         if user is None:
             return None
         return self._principal_info(user)
