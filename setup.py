@@ -24,6 +24,7 @@ setup(
         'zope.component',
         'zope.interface',
         'zope.pluggableauth',
+        'zope.principalregistry',
         'zope.schema',
         'zope.securitypolicy',
     ],

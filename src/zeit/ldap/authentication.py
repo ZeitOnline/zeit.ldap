@@ -7,6 +7,7 @@ import zeit.ldap.connection
 import zope.app.appsetup.product
 import zope.container.contained
 import zope.pluggableauth.interfaces
+import zope.principalregistry.principalregistry
 import zope.schema
 import zope.security.interfaces
 
@@ -267,14 +268,14 @@ class PrincipalRegistryAuthenticator(object):
     """An authentication plugin that looks up users from the PrincipalRegistry.
     """
 
+    registry = zope.principalregistry.principalregistry.principalRegistry
+
     def authenticateCredentials(self, credentials):
         if credentials is None:
             return None
 
-        prinreg = zope.component.getGlobalSiteManager().getUtility(
-            zope.authentication.interfaces.IAuthentication)
         try:
-            user = prinreg.getPrincipalByLogin(credentials['login'])
+            user = self.registry.getPrincipalByLogin(credentials['login'])
         except KeyError:
             user = None
         if user is None:
@@ -285,9 +286,7 @@ class PrincipalRegistryAuthenticator(object):
         return self._principal_info(user)
 
     def principalInfo(self, id):
-        prinreg = zope.component.getGlobalSiteManager().getUtility(
-            zope.authentication.interfaces.IAuthentication)
-        user = prinreg.getPrincipal(id)
+        user = self.registry.getPrincipal(id)
         if user is None or zope.security.interfaces.IGroup.providedBy(user):
             return None
         return self._principal_info(user)
