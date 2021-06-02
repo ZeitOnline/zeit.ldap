@@ -4,7 +4,8 @@
    i18n_domain="zope"
    >
 
-  <include package="zeit.cms" file="ftesting.zcml" />
+  <includeOverrides package="zeit.ldap" file="authentication.zcml" />
   <include package="zeit.ldap" />
+  <include package="zeit.cms" file="ftesting.zcml" />
 
 </configure>

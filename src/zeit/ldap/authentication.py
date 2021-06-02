@@ -1,12 +1,16 @@
 from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 from zope.pluggableauth.factories import PrincipalInfo
+from zope.publisher.interfaces.xmlrpc import IXMLRPCRequest
 import ldap.filter
 import persistent
 import zeit.ldap.connection
 import zope.app.appsetup.product
 import zope.container.contained
+import zope.pluggableauth.authentication
 import zope.pluggableauth.interfaces
+import zope.pluggableauth.plugins.httpplugins
+import zope.pluggableauth.plugins.session
 import zope.principalregistry.principalregistry
 import zope.schema
 import zope.security.interfaces
@@ -244,8 +248,7 @@ def ldapPluginFactory():
 
 @zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
 class PrincipalRegistryAuthenticator:
-    """An authentication plugin that looks up users from the PrincipalRegistry.
-    """
+    """Connects PAU to zope.principalregistry."""
 
     registry = zope.principalregistry.principalregistry.principalRegistry
 
@@ -272,3 +275,54 @@ class PrincipalRegistryAuthenticator:
 
     def _principal_info(self, user):
         return PrincipalInfo(user.id, user.getLogin(), user.title, '')
+
+
+class BasicAuthCredentials(
+        zope.pluggableauth.plugins.httpplugins.HTTPBasicAuthCredentialsPlugin):
+    """We only support basic auth for xmlrpc requests."""
+
+    def extractCredentials(self, request):
+        if not IXMLRPCRequest.providedBy(request):
+            return None
+        return super().extractCredentials(request)
+
+    def challenge(self, request):
+        if not IXMLRPCRequest.providedBy(request):
+            return False
+        return super().challenge(request)
+
+
+class SessionCredentials(
+        zope.pluggableauth.plugins.session.SessionCredentialsPlugin):
+    """Make PAU work as a non-persistent utility.
+
+    The upstream assumption is to be persistent, i.e. at least traversal to
+    the root folder will have already happened, so any other persistent
+    utilities (like the zope.session ClientIdManager) are available.
+    We don't need/want the PAU to be persistent, so we register it with the
+    global ZCA registry. This means, it can and will be used before any
+    traversal happens (e.g. by ZCML to access principals for grant operations).
+    Since actual authentication only makes sense after at least traversing to
+    the root folder, we can simply ignore attempts that happen before that.
+    """
+
+    def extractCredentials(self, request):
+        # The "proper" way to check would be `ISession(request)`, but since
+        # this is going to be called on every request before traversal starts,
+        # let's make it as cheap-to-fail as possible.
+        if zope.component.queryUtility(
+                zope.session.interfaces.IClientIdManager) is None:
+            return None
+        return super().extractCredentials(request)
+
+
+@zope.interface.implementer(zope.authentication.interfaces.IAuthentication)
+def pauFactory():
+    pau = zope.pluggableauth.authentication.PluggableAuthentication()
+    pau.authenticatorPlugins = ('principalregistry', 'ldap')
+    pau.credentialsPlugins = (
+        'No Challenge if Authenticated',
+        'xmlrpc-basic-auth',
+        'session',
+    )
+    return pau

@@ -37,4 +37,6 @@ def install(root):
 
 
 def evolve(context):
-    zeit.cms.generation.do_evolve(context, install)
+    # DISABLED, we no longer use principalfolder and thus need no persistence
+    # zeit.cms.generation.do_evolve(context, install)
+    return

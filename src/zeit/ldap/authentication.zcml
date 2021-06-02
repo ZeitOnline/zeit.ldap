@@ -1,0 +1,7 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+  <include package="zope.component" file="meta.zcml" />
+
+  <!-- NOTE: This file must be included as override, since
+       zope.principalregistry already registers an IAuthentication utility. -->
+  <utility factory=".authentication.pauFactory" />
+</configure>

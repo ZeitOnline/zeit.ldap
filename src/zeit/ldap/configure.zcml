@@ -20,8 +20,21 @@
     />
 
   <utility
+    provides="zope.pluggableauth.interfaces.IAuthenticatorPlugin"
     factory=".authentication.PrincipalRegistryAuthenticator"
     name="principalregistry"
+    />
+
+  <utility
+    provides="zope.pluggableauth.interfaces.ICredentialsPlugin"
+    name="xmlrpc-basic-auth"
+    factory=".authentication.BasicAuthCredentials"
+    />
+
+  <utility
+    provides="zope.pluggableauth.interfaces.ICredentialsPlugin"
+    name="session"
+    factory=".authentication.SessionCredentials"
     />
 
 </configure>
