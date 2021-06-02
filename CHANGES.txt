@@ -4,7 +4,7 @@ zeit.ldap changes
 1.7.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-1875: Make Rotterdam UI work with non-persistent PAU
 
 
 1.7.0 (2021-06-02)

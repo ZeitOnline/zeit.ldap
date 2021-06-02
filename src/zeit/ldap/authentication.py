@@ -325,4 +325,12 @@ def pauFactory():
         'xmlrpc-basic-auth',
         'session',
     )
+    # Make Rotterdam UI happy
+    pau.__parent__ = FakeRoot()
+    pau.__name__ = 'authentication'
     return pau
+
+
+@zope.interface.implementer(zope.location.interfaces.IRoot)
+class FakeRoot:
+    pass
