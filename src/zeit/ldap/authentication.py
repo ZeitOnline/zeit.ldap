@@ -1,5 +1,6 @@
 from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
+from zope.pluggableauth.factories import PrincipalInfo
 import ldap.filter
 import persistent
 import sys
@@ -30,19 +31,6 @@ class ILDAPSearchSchema(zope.interface.Interface):
     sn = zope.schema.TextLine(
         title=u'sn',
         required=False)
-
-
-@zope.interface.implementer(zope.pluggableauth.interfaces.IPrincipalInfo)
-class PrincipalInfo(object):
-
-    def __init__(self, id, login='', title='', description=''):
-        self.id = id
-        self.login = login
-        self.title = title
-        self.description = description
-
-    def __repr__(self):
-        return 'PrincipalInfo(%r)' % self.id
 
 
 # copy&paste&tweak from ldappas.authentication
