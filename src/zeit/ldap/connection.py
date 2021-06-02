@@ -1,5 +1,4 @@
 import ldap
-import sys
 import zope.app.appsetup.product
 import zope.interface
 
@@ -32,10 +31,10 @@ class NoSuchObject(Exception):
 
 
 @zope.interface.implementer(ILDAPAdapter)
-class LDAPAdapter(object):
+class LDAPAdapter:
 
     def __init__(self, host='localhost', port=389, useSSL=False,
-                 bindDN=u'', bindPassword=u''):
+                 bindDN='', bindPassword=''):
         self.host = host
         self.port = port
         self.useSSL = useSSL
@@ -62,8 +61,8 @@ class LDAPAdapter(object):
 
         # Bind the connection to the dn
         if dn is None:
-            dn = self.bindDN or u''
-            password = self.bindPassword or u''
+            dn = self.bindDN or ''
+            password = self.bindPassword or ''
         try:
             conn.simple_bind_s(dn, password)
         except ldap.SERVER_DOWN:
@@ -124,11 +123,9 @@ class LDAPConnection(object):
 
         self.conn.modify_s(dn, mod_list)
 
-    def search(self, base, scope=u'sub', filter=u'(objectClass=*)',
+    def search(self, base, scope='sub', filter='(objectClass=*)',
                attrs=None):
         scope = convertScope(scope)
-        if attrs is not None:
-            attrs = [ensure_text(attr) for attr in attrs]
         try:
             ldap_entries = self.conn.search_s(base, scope, filter, attrs)
         except ldap.NO_SUCH_OBJECT:
@@ -154,15 +151,7 @@ def ldapAdapterFactory():
     config = zope.app.appsetup.product.getProductConfiguration(
         'zeit.ldap') or {}
     adapter = LDAPAdapter(
-        host=ensure_text(config.get('host', 'localhost')),
-        bindDN=ensure_text(config.get('bind-dn', u'')),
-        bindPassword=ensure_text(config.get('bind-password', u'')))
+        host=config.get('host', 'localhost'),
+        bindDN=config.get('bind-dn', ''),
+        bindPassword=config.get('bind-password', ''))
     return adapter
-
-
-def ensure_text(value):
-    if sys.version_info >= (3,):
-        return value
-    if isinstance(value, unicode):  # noqa
-        return value
-    return value.decode('utf-8') if value is not None else None
