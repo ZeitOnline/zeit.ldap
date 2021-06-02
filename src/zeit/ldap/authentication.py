@@ -287,7 +287,7 @@ class PrincipalRegistryAuthenticator(object):
 
     def principalInfo(self, id):
         user = self.registry.getPrincipal(id)
-        if user is None or zope.security.interfaces.IGroup.providedBy(user):
+        if user is None:
             return None
         return self._principal_info(user)
 
