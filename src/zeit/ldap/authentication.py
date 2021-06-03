@@ -228,7 +228,7 @@ def ldapPluginFactory():
     config = zope.app.appsetup.product.getProductConfiguration(
         'zeit.ldap') or {}
     ldap = LDAPAuthentication()
-    ldap.principalIdPrefix = 'ldap.'
+    ldap.principalIdPrefix = config.get('principal-prefix', 'ldap.')
     ldap.adapterName = 'zeit.ldapconnection'
     ldap.searchBases = config.get('search-base', '').split(' ')
     ldap.searchScope = config.get('search-scope', '')
