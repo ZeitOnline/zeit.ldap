@@ -4,7 +4,7 @@ zeit.ldap changes
 1.7.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-1874: Rely on our ldap schema, no need to guard whether fields exist
 
 
 1.7.2 (2021-06-02)

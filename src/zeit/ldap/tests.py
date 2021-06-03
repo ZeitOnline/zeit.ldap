@@ -47,6 +47,8 @@ class AuthenticationTest(unittest.TestCase):
             name=self.auth.adapterName)
         self.auth.idAttribute = 'dn'
         self.auth.loginAttribute = 'login'
+        self.auth.titleAttribute = 'login'
+        self.auth.descriptionAttribute = 'mail'
 
     def tearDown(self):
         gsm = zope.component.getGlobalSiteManager()
@@ -96,6 +98,8 @@ class LDAPIntegrationTest(unittest.TestCase):
         auth.filterQuery = env['ZEIT_LDAP_FILTER_QUERY']
         auth.idAttribute = env['ZEIT_LDAP_LOGIN_FIELD']
         auth.loginAttribute = env['ZEIT_LDAP_LOGIN_FIELD']
+        auth.titleAttribute = env['ZEIT_LDAP_LOGIN_FIELD']
+        auth.descriptionAttribute = env['ZEIT_LDAP_LOGIN_FIELD']
         principal = auth.authenticateCredentials(
             {'login': env['ZEIT_LDAP_USERNAME'],
              'password': env['ZEIT_LDAP_PASSWORD']})

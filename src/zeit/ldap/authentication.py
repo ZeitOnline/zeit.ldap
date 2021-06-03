@@ -54,6 +54,7 @@ class LDAPAuthentication(persistent.Persistent,
     principalIdPrefix = ''
     idAttribute = ''
     titleAttribute = ''
+    descriptionAttribute = ''
     groupIdAttribute = ''
 
     schema = ILDAPSearchSchema
@@ -127,20 +128,11 @@ class LDAPAuthentication(persistent.Persistent,
         return PrincipalInfo(id, **self.getInfoFromEntry(dn, entry))
 
     def getInfoFromEntry(self, dn, entry):
-        try:
-            title = entry[self.titleAttribute][0]
-        except (KeyError, IndexError):
-            title = dn
-        info = {
+        return {
             'login': entry[self.loginAttribute][0],
-            'title': title,
-            'description': title,
+            'title': entry[self.titleAttribute][0],
+            'description': entry[self.descriptionAttribute][0],
         }
-        try:
-            info['description'] = entry['mail'][0]
-        except (KeyError, IndexError):
-            pass
-        return info
 
     @CONFIG_CACHE.cache_on_arguments()
     def principalInfo(self, id):
@@ -243,6 +235,7 @@ def ldapPluginFactory():
     ldap.loginAttribute = config.get('login-attribute', '')
     ldap.idAttribute = config.get('id-attribute', '')
     ldap.titleAttribute = config.get('title-attribute')
+    ldap.descriptionAttribute = config.get('description-attribute')
     ldap.filterQuery = config.get('filter-query', '')
     return ldap
 
