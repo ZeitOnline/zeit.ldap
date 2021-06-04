@@ -363,13 +363,10 @@ class SessionCredentials(
 
 @zope.interface.implementer(zope.authentication.interfaces.IAuthentication)
 def pauFactory():
+    conf = zope.app.appsetup.product.getProductConfiguration('zeit.ldap') or {}
     pau = zope.pluggableauth.authentication.PluggableAuthentication()
-    pau.authenticatorPlugins = ('principalregistry', 'ldap')
-    pau.credentialsPlugins = (
-        'No Challenge if Authenticated',
-        'xmlrpc-basic-auth',
-        'session',
-    )
+    pau.authenticatorPlugins = conf['authenticator-plugins'].split(',')
+    pau.credentialsPlugins = conf['credentials-plugins'].split(',')
     # Make Rotterdam UI happy
     pau.__parent__ = FakeRoot()
     pau.__name__ = 'authentication'
