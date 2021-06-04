@@ -1,3 +1,4 @@
+from ast import literal_eval
 from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 from zope.pluggableauth.factories import PrincipalInfo
@@ -53,6 +54,7 @@ class LDAPAuthentication(persistent.Persistent,
     loginAttribute = ''
     principalIdPrefix = ''
     idAttribute = ''
+    normalizeId = False
     titleAttribute = ''
     descriptionAttribute = ''
     groupIdAttribute = ''
@@ -118,6 +120,8 @@ class LDAPAuthentication(persistent.Persistent,
         else:
             return None
         id = self.principalIdPrefix + id
+        if self.normalizeId:
+            id = id.lower()
 
         # Check authentication.
         try:
@@ -234,6 +238,7 @@ def ldapPluginFactory():
     ldap.searchScope = config.get('search-scope', '')
     ldap.loginAttribute = config.get('login-attribute', '')
     ldap.idAttribute = config.get('id-attribute', '')
+    ldap.normalizeId = literal_eval(config.get('normalize-id', 'False'))
     ldap.titleAttribute = config.get('title-attribute')
     ldap.descriptionAttribute = config.get('description-attribute')
     ldap.filterQuery = config.get('filter-query', '')
