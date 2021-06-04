@@ -2,6 +2,7 @@ from ast import literal_eval
 from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 from zope.pluggableauth.factories import PrincipalInfo
+from zope.publisher.interfaces.http import IHTTPRequest
 from zope.publisher.interfaces.xmlrpc import IXMLRPCRequest
 import ldap.filter
 import persistent
@@ -277,6 +278,48 @@ class PrincipalRegistryAuthenticator:
 
     def _principal_info(self, user):
         return PrincipalInfo(user.id, user.getLogin(), user.title, '')
+
+
+@zope.interface.implementer(zope.pluggableauth.interfaces.ICredentialsPlugin)
+class OIDCHeaderCredentials:
+
+    email_header = 'X-OIDC-Email'
+    name_header = 'X-OIDC-User'
+
+    def extractCredentials(self, request):
+        if not IHTTPRequest.providedBy(request):
+            return None
+        if self.email_header not in request.headers:
+            return None
+        return {
+            'oidc': True,  # Use a marker interface instead?
+            'login': request.headers[self.email_header],
+            'password': '',  # Implicit zope.pluggableauth protocol
+            'name': request.headers.get(self.name_header, ''),
+        }
+
+    def challenge(self, request):
+        # Challenging is already handled by nginx+oauth-proxy.
+        return False
+
+
+@zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
+class AzureADAuthenticator:
+
+    def authenticateCredentials(self, credentials):
+        if credentials is None:
+            return None
+        if 'oidc' not in credentials:  # See OIDCHeaderCredentials
+            return None
+        id = self._id_from_email(credentials['login'])
+        return PrincipalInfo(
+            id, id, credentials['name'], credentials['login'].lower())
+
+    def _id_from_email(self, email):
+        return email.lower().split('@')[0]
+
+    def principalInfo(self, id):
+        return PrincipalInfo(id, id, '', '')  # XXX OPS-1919
 
 
 class BasicAuthCredentials(
