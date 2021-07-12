@@ -123,6 +123,7 @@ class LDAPAuthentication(persistent.Persistent,
         id = self.principalIdPrefix + id
         if self.normalizeId:
             id = id.lower()
+            id = id.split('@')[0]
 
         # Check authentication.
         try:
