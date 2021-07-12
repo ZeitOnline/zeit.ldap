@@ -56,6 +56,7 @@ class LDAPAuthentication(persistent.Persistent,
     principalIdPrefix = ''
     idAttribute = ''
     normalizeId = False
+    idDomain = ''
     titleAttribute = ''
     descriptionAttribute = ''
     groupIdAttribute = ''
@@ -123,7 +124,8 @@ class LDAPAuthentication(persistent.Persistent,
         id = self.principalIdPrefix + id
         if self.normalizeId:
             id = id.lower()
-            id = id.split('@')[0]
+        if self.idDomain:
+            id = id.replace('@%s' % self.idDomain, '')
 
         # Check authentication.
         try:
@@ -146,6 +148,8 @@ class LDAPAuthentication(persistent.Persistent,
         if not id.startswith(self.principalIdPrefix):
             return None
         internal_id = id[len(self.principalIdPrefix):]
+        if self.idDomain:
+            internal_id += '@%s' % self.idDomain
 
         da = self.getLDAPAdapter()
         if da is None:
@@ -241,6 +245,7 @@ def ldapPluginFactory():
     ldap.loginAttribute = config.get('login-attribute', '')
     ldap.idAttribute = config.get('id-attribute', '')
     ldap.normalizeId = literal_eval(config.get('normalize-id', 'False'))
+    ldap.idDomain = config.get('id-domain')
     ldap.titleAttribute = config.get('title-attribute')
     ldap.descriptionAttribute = config.get('description-attribute')
     ldap.filterQuery = config.get('filter-query', '')
