@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.7.4 (unreleased)
+1.7.4 (2021-07-12)
 ------------------
 
 - OPS-1874: Support using email addresses as principal ids
