@@ -9,6 +9,7 @@ import persistent
 import zeit.ldap.connection
 import zope.app.appsetup.product
 import zope.authentication.interfaces
+import zope.component.hooks
 import zope.container.contained
 import zope.pluggableauth.authentication
 import zope.pluggableauth.interfaces
@@ -291,6 +292,7 @@ class OIDCHeaderCredentials:
 
     email_header = 'X-OIDC-Email'
     name_header = 'X-OIDC-User'
+    logout_url = '/oauth2/sign_in'  # clears oidc cookies and prompts to login
 
     def extractCredentials(self, request):
         if not IHTTPRequest.providedBy(request):
@@ -307,6 +309,12 @@ class OIDCHeaderCredentials:
     def challenge(self, request):
         # Challenging is already handled by nginx+oauth-proxy.
         return False
+
+    def logout(self, request):
+        home = zope.traversing.browser.absoluteURL(
+            zope.component.hooks.getSite(), request)
+        request.response.redirect(home + self.logout_url)
+        return True
 
 
 @zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
@@ -365,6 +373,17 @@ class SessionCredentials(
                 zope.session.interfaces.IClientIdManager) is None:
             return None
         return super().extractCredentials(request)
+
+    def logout(self, request):
+        # Strictly speaking, things like redirecting the browser are the job of
+        # the logout view. But since we need different treatments for session
+        # and oidc, it's probably fair to put them in their credentials plugin.
+        if not super().logout(request):
+            return False
+        home = zope.traversing.browser.absoluteURL(
+            zope.component.hooks.getSite(), request)
+        request.response.redirect(home)
+        return True
 
 
 @zope.interface.implementer(zope.authentication.interfaces.IAuthentication)

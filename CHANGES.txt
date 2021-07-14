@@ -4,7 +4,7 @@ zeit.ldap changes
 1.7.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-2058: Implement logout for oidc
 
 
 1.7.6 (2021-07-14)
