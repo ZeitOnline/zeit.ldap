@@ -4,7 +4,7 @@ zeit.ldap changes
 1.7.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-1873: First stab at using oauth-proxy headers for authentication
 
 
 1.7.5 (2021-07-12)

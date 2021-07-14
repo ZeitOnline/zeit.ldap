@@ -37,5 +37,16 @@
     factory=".authentication.SessionCredentials"
     />
 
+  <utility
+    provides="zope.pluggableauth.interfaces.ICredentialsPlugin"
+    name="oidc"
+    factory=".authentication.OIDCHeaderCredentials"
+    />
+  <utility
+    provides="zope.pluggableauth.interfaces.IAuthenticatorPlugin"
+    factory=".authentication.AzureADAuthenticator"
+    name="azuread"
+    />
+
 </configure>
 
