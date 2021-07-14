@@ -325,12 +325,9 @@ class AzureADAuthenticator:
             return None
         if 'oidc' not in credentials:  # See OIDCHeaderCredentials
             return None
-        id = self._id_from_email(credentials['login'])
+        email = credentials['login'].lower()
         return PrincipalInfo(
-            id, id, credentials['name'], credentials['login'].lower())
-
-    def _id_from_email(self, email):
-        return email.lower().split('@')[0]
+            email, email, credentials['name'], email)
 
     def principalInfo(self, id):
         return PrincipalInfo(id, id, '', '')  # XXX OPS-1919
