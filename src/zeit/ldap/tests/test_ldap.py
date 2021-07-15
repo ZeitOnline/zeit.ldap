@@ -1,34 +1,9 @@
 import os
 import unittest
-import zeit.cms.testing
 import zeit.ldap.authentication
 import zeit.ldap.connection
+import zeit.ldap.testing
 import zope.component
-
-
-product_config = """
-<product-config zeit.ldap>
-  authenticator-plugins principalregistry,ldap
-  credentials-plugins xmlrpc-basic-auth
-</product-config>
-"""
-
-CONFIG_LAYER = zeit.cms.testing.ProductConfigLayer(product_config, bases=(
-    zeit.cms.testing.CONFIG_LAYER,))
-
-
-class CacheLayer(zeit.cms.testing.CacheLayer):
-
-    defaultBases = (CONFIG_LAYER,)
-
-    def setUp(self):
-        zeit.cms.application.configure_dogpile_cache(None)
-
-
-DOGPILE_CACHE_LAYER = CacheLayer()
-
-ZCML_LAYER = zeit.cms.testing.ZCMLLayer(bases=(CONFIG_LAYER,))
-ZOPE_LAYER = zeit.cms.testing.ZopeLayer(bases=(ZCML_LAYER,))
 
 
 class FakeLdap:
@@ -45,7 +20,7 @@ class FakeLdap:
 
 class AuthenticationTest(unittest.TestCase):
 
-    layer = DOGPILE_CACHE_LAYER
+    layer = zeit.ldap.testing.DOGPILE_CACHE_LAYER
 
     def setUp(self):
         super().setUp()
@@ -83,7 +58,7 @@ class AuthenticationTest(unittest.TestCase):
 
 class LDAPIntegrationTest(unittest.TestCase):
 
-    layer = DOGPILE_CACHE_LAYER
+    layer = zeit.ldap.testing.DOGPILE_CACHE_LAYER
 
     def setUp(self):
         super().setUp()
@@ -114,9 +89,3 @@ class LDAPIntegrationTest(unittest.TestCase):
             {'login': env['ZEIT_LDAP_USERNAME'],
              'password': env['ZEIT_LDAP_PASSWORD']})
         self.assertEqual(principal.login, env['ZEIT_LDAP_USERNAME'])
-
-
-def test_suite():
-    return zeit.cms.testing.FunctionalDocFileSuite(
-        'README.txt',
-        layer=ZOPE_LAYER)
