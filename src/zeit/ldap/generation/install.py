@@ -1,10 +1,12 @@
 import zeit.cms.generation
 import zeit.cms.generation.install
+import zeit.ldap.azure
 import zope.authentication.interfaces
 import zope.pluggableauth.authentication
 
 
-def install(root):
+# DISABLED, we no longer use principalfolder and thus need no persistent PAU
+def install_pau(root):
     site_manager = zope.component.getSiteManager()
 
     auth = zeit.cms.generation.install.installLocalUtility(
@@ -36,7 +38,14 @@ def install(root):
     )
 
 
+def install_azure_cache(root):
+    sm = zope.component.getSiteManager()
+    zeit.cms.generation.install.installLocalUtility(
+        sm,
+        zeit.ldap.azure.PersistentTokenCache,
+        'azure-token-cache',
+        zeit.ldap.azure.ITokenCache)
+
+
 def evolve(context):
-    # DISABLED, we no longer use principalfolder and thus need no persistence
-    # zeit.cms.generation.do_evolve(context, install)
-    return
+    zeit.cms.generation.do_evolve(context, install_azure_cache)

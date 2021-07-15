@@ -48,5 +48,7 @@
     name="azuread"
     />
 
+  <utility factory=".azure.from_product_config" />
+
 </configure>
 

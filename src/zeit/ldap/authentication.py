@@ -329,8 +329,12 @@ class AzureADAuthenticator:
         return PrincipalInfo(
             email, email, credentials['name'], email)
 
+    @CONFIG_CACHE.cache_on_arguments()
     def principalInfo(self, id):
-        return PrincipalInfo(id, id, '', '')  # XXX OPS-1919
+        # `id` is the email address
+        ad = zope.component.getUtility(zeit.ldap.azure.IActiveDirectory)
+        user = ad.get_user(id)
+        return PrincipalInfo(id, id, user['displayName'], id)
 
 
 class BasicAuthCredentials(

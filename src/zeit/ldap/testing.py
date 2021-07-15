@@ -6,6 +6,10 @@ product_config = """
 <product-config zeit.ldap>
   authenticator-plugins principalregistry,ldap
   credentials-plugins xmlrpc-basic-auth
+
+  ad-tenant common
+  ad-client-id none
+  ad-client-secret none
 </product-config>
 """
 
@@ -25,3 +29,8 @@ DOGPILE_CACHE_LAYER = CacheLayer()
 
 ZCML_LAYER = zeit.cms.testing.ZCMLLayer(bases=(CONFIG_LAYER,))
 ZOPE_LAYER = zeit.cms.testing.ZopeLayer(bases=(ZCML_LAYER,))
+
+
+class FunctionalTestCase(zeit.cms.testing.FunctionalTestCase):
+
+    layer = ZOPE_LAYER
