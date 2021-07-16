@@ -317,7 +317,17 @@ class OIDCHeaderCredentials:
         return True
 
 
-@zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
+class IAzureSearchSchema(zope.interface.Interface):
+
+    query = zope.schema.TextLine(
+        title='Azure AD Name (substring)',
+        required=False)
+
+
+@zope.interface.implementer(
+    zope.pluggableauth.interfaces.IAuthenticatorPlugin,
+    zope.pluggableauth.interfaces.IQueriableAuthenticator,
+    zope.pluggableauth.interfaces.IQuerySchemaSearch)
 class AzureADAuthenticator:
 
     def authenticateCredentials(self, credentials):
@@ -334,7 +344,21 @@ class AzureADAuthenticator:
         # `id` is the email address
         ad = zope.component.getUtility(zeit.ldap.azure.IActiveDirectory)
         user = ad.get_user(id)
+        if not user:
+            return None
         return PrincipalInfo(id, id, user['displayName'], id)
+
+    schema = IAzureSearchSchema
+
+    def search(self, query, start=None, batch_size=None):
+        ad = zope.component.getUtility(zeit.ldap.azure.IActiveDirectory)
+        result = [
+            x['userPrincipalName'] for x in ad.search_users(query['query'])]
+        if start is None:
+            start = 0
+        if batch_size is None:
+            batch_size = len(result)
+        return result[start:start + batch_size]
 
 
 class BasicAuthCredentials(

@@ -67,6 +67,22 @@ class AzureAD:
                 log.warning('AD get_user(%r) failed', upn, exc_info=True)
             return None
 
+    def search_users(self, query):
+        """Search for users by substring of their displayName.
+        Returns a list of dicts with keys `displayName` and `userPrincipalName`
+        """
+        try:
+            data = self._request(
+                'GET /users', headers={'ConsistencyLevel': 'eventual'},
+                params={
+                    '$select': 'displayName,userPrincipalName',
+                    '$search': '"displayName:%s"' % query
+                })
+            return data.get('value', [])
+        except requests.exceptions.RequestException:
+            log.warning('AD search_users(%r) failed', query, exc_info=True)
+            return []
+
 
 @zope.interface.implementer(IActiveDirectory)
 def from_product_config():
