@@ -3,7 +3,6 @@ from zeit.cms.interfaces import CONFIG_CACHE
 from zeit.ldap.connection import ServerDown, InvalidCredentials, NoSuchObject
 from zope.pluggableauth.factories import PrincipalInfo
 from zope.publisher.interfaces.http import IHTTPRequest
-from zope.publisher.interfaces.xmlrpc import IXMLRPCRequest
 import ldap.filter
 import persistent
 import zeit.ldap.connection
@@ -363,15 +362,22 @@ class AzureADAuthenticator:
 
 class BasicAuthCredentials(
         zope.pluggableauth.plugins.httpplugins.HTTPBasicAuthCredentialsPlugin):
-    """We only support basic auth for xmlrpc requests."""
+    """We only support basic auth on non-public ingress endpoints, e.g. for
+    xmlrpc requests and administrative access.
+    """
+
+    header_name = 'X-Zope-Basicauth'
+
+    def _enabled(self, request):
+        return request.headers.get(self.header_name, '') != 'disabled'
 
     def extractCredentials(self, request):
-        if not IXMLRPCRequest.providedBy(request):
+        if not self._enabled(request):
             return None
         return super().extractCredentials(request)
 
     def challenge(self, request):
-        if not IXMLRPCRequest.providedBy(request):
+        if not self._enabled(request):
             return False
         return super().challenge(request)
 
