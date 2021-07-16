@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.7.7 (unreleased)
+1.8.0 (2021-07-16)
 ------------------
 
 - OPS-1919: Implement looking up users in AD
