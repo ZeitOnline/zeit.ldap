@@ -77,3 +77,8 @@ class ADIntegrationTest(zeit.ldap.testing.FunctionalTestCase):
         email = os.environ['ZEIT_LDAP_AD_TESTUSER']
         p = auth.principalInfo(email)
         self.assertEqual(p.id, email)
+
+    def test_getPrincipal_returns_none_when_not_found(self):
+        auth = zeit.ldap.authentication.AzureADAuthenticator()
+        p = auth.principalInfo('nonexistent@zeit.de')
+        self.assertEqual(None, p)

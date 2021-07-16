@@ -2,6 +2,7 @@ import logging
 import msal
 import persistent
 import requests
+import requests.exceptions
 import zope.interface
 
 
@@ -52,11 +53,17 @@ class AzureAD:
         return token['access_token']
 
     def get_user(self, upn):
+        """Look up user by userPrincipalName, for which ZEIT AD uses the
+        (pseudo-) email address. Returns a dict with keys `displayName` and
+        `userPrincipalName`.
+        """
         try:
             return self._request('GET /users/%s' % upn, params={
                 '$select': 'displayName,userPrincipalName'
             })
-        except requests.exception.RequestException:
+        except requests.exceptions.RequestException as e:
+            if getattr(e.response, 'status_code', 599) != 404:
+                log.warning('AD get_user(%r) failed', upn, exc_info=True)
             return None
 
 
