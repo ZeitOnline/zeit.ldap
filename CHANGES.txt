@@ -8,6 +8,8 @@ zeit.ldap changes
 
 - OPS-2058: Implement logout for oidc
 
+- OPS-1873: Make oidc header names configurable
+
 
 1.7.6 (2021-07-14)
 ------------------

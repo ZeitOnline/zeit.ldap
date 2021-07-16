@@ -40,7 +40,7 @@
   <utility
     provides="zope.pluggableauth.interfaces.ICredentialsPlugin"
     name="oidc"
-    factory=".authentication.OIDCHeaderCredentials"
+    factory=".authentication.oidc_from_product_config"
     />
   <utility
     provides="zope.pluggableauth.interfaces.IAuthenticatorPlugin"

@@ -316,6 +316,22 @@ class OIDCHeaderCredentials:
         return True
 
 
+@zope.interface.implementer(zope.pluggableauth.interfaces.ICredentialsPlugin)
+def oidc_from_product_config():
+    config = zope.app.appsetup.product.getProductConfiguration(
+        'zeit.ldap') or {}
+    plugin = OIDCHeaderCredentials()
+    settings = {
+        'email_header': 'oidc-header-email',
+        'name_header': 'oidc-header-name',
+        'logout_url': 'oidc-logout-url',
+    }
+    for prop, key in settings.items():
+        if key in config:
+            setattr(plugin, prop, config[key])
+    return plugin
+
+
 class IAzureSearchSchema(zope.interface.Interface):
 
     query = zope.schema.TextLine(
