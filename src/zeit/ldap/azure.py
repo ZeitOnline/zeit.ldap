@@ -3,6 +3,7 @@ import msal
 import persistent
 import requests
 import requests.exceptions
+import urllib.parse
 import zope.interface
 
 
@@ -58,9 +59,9 @@ class AzureAD:
         `userPrincipalName`.
         """
         try:
-            return self._request('GET /users/%s' % upn, params={
-                '$select': 'displayName,userPrincipalName'
-            })
+            return self._request(
+                'GET /users/%s' % urllib.parse.quote(upn), params={
+                    '$select': 'displayName,userPrincipalName'})
         except requests.exceptions.RequestException as e:
             if getattr(e.response, 'status_code', 599) != 404:
                 log.warning('AD get_user(%r) failed', upn, exc_info=True)
