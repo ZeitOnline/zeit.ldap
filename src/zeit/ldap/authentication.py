@@ -148,7 +148,7 @@ class LDAPAuthentication(persistent.Persistent,
         if not id.startswith(self.principalIdPrefix):
             return None
         internal_id = id[len(self.principalIdPrefix):]
-        if self.idDomain:
+        if self.idDomain and '@' not in internal_id:
             internal_id += '@%s' % self.idDomain
 
         da = self.getLDAPAdapter()
@@ -222,7 +222,10 @@ class LDAPAuthentication(persistent.Persistent,
         infos = []
         for dn, entry in res:
             try:
-                infos.append(prefix + entry[self.idAttribute][0])
+                id = prefix + entry[self.idAttribute][0]
+                if self.idDomain:
+                    id = id.replace('@%s' % self.idDomain, '')
+                infos.append(id)
             except (KeyError, IndexError):
                 pass
 
