@@ -305,7 +305,8 @@ class OIDCHeaderCredentials:
             'oidc': True,  # Use a marker interface instead?
             'login': request.headers[self.email_header],
             'password': '',  # Implicit zope.pluggableauth protocol
-            'name': request.headers.get(self.name_header, ''),
+            'name': request.headers.get(  # PEP-3333 is weird
+                self.name_header, '').encode('latin-1').decode('utf-8'),
         }
 
     def challenge(self, request):

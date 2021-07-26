@@ -4,7 +4,7 @@ zeit.ldap changes
 1.8.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-1929: Handle names with umlauts correctly
 
 
 1.8.1 (2021-07-19)
