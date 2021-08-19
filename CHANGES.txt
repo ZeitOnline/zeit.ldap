@@ -4,7 +4,7 @@ zeit.ldap changes
 1.8.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- OPS-1874: More principal id domain fixes
 
 
 1.8.2 (2021-07-26)

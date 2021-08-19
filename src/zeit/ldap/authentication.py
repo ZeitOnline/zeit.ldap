@@ -223,6 +223,8 @@ class LDAPAuthentication(persistent.Persistent,
         for dn, entry in res:
             try:
                 id = prefix + entry[self.idAttribute][0]
+                if self.normalizeId:
+                    id = id.lower()
                 if self.idDomain:
                     id = id.replace('@%s' % self.idDomain, '')
                 infos.append(id)
