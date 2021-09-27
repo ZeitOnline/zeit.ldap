@@ -363,6 +363,7 @@ class AzureADAuthenticator:
     @CONFIG_CACHE.cache_on_arguments()
     def principalInfo(self, id):
         # `id` is the email address
+        id = id.lower()
         ad = zope.component.getUtility(zeit.ldap.azure.IActiveDirectory)
         user = ad.get_user(id)
         if not user:
@@ -374,7 +375,8 @@ class AzureADAuthenticator:
     def search(self, query, start=None, batch_size=None):
         ad = zope.component.getUtility(zeit.ldap.azure.IActiveDirectory)
         result = [
-            x['userPrincipalName'] for x in ad.search_users(query['query'])]
+            x['userPrincipalName'].lower()
+            for x in ad.search_users(query['query'])]
         if start is None:
             start = 0
         if batch_size is None:
