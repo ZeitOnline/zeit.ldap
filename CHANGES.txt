@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.8.5 (unreleased)
+1.8.5 (2021-10-18)
 ------------------
 
 - ZO-358: Update function location
