@@ -1,4 +1,4 @@
-import zeit.cms.application
+import zeit.cms.zope
 import zeit.cms.testing
 
 
@@ -22,7 +22,7 @@ class CacheLayer(zeit.cms.testing.CacheLayer):
     defaultBases = (CONFIG_LAYER,)
 
     def setUp(self):
-        zeit.cms.application.configure_dogpile_cache(None)
+        zeit.cms.zope.configure_dogpile_cache(None)
 
 
 DOGPILE_CACHE_LAYER = CacheLayer()
