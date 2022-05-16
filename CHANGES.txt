@@ -4,7 +4,7 @@ zeit.ldap changes
 1.8.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- MAINT: Initialize Azure connection on use, not on ZCML load time
 
 
 1.8.5 (2021-10-18)

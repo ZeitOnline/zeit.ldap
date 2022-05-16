@@ -1,3 +1,4 @@
+from zope.cachedescriptors.property import Lazy as cachedproperty
 import logging
 import msal
 import persistent
@@ -24,9 +25,17 @@ class AzureAD:
     graph_url = 'https://graph.microsoft.com/v1.0'
 
     def __init__(self, tenant_id, client_id, client_secret):
-        self.app = msal.ConfidentialClientApplication(
-            client_id, client_secret,
-            authority='https://login.microsoftonline.com/%s' % tenant_id)
+        self.tenant_id = tenant_id
+        self.client_id = client_id
+        self.client_secret = client_secret
+
+    @cachedproperty
+    def app(self):
+        app = msal.ConfidentialClientApplication(
+            self.client_id, self.client_secret,
+            authority='https://login.microsoftonline.com/%s' % self.tenant_id)
+        app.token_cache = zope.component.getUtility(ITokenCache)
+        return app
 
     def _request(self, request, **kw):
         http = requests.Session()
@@ -41,8 +50,6 @@ class AzureAD:
     _graph_api_scopes = ['https://graph.microsoft.com/.default']
 
     def _auth_token(self):
-        self.app.token_cache = zope.component.getUtility(ITokenCache)
-
         # MSAL unfortunately has no info logging, e.g. for "calling refresh"
         token = self.app.acquire_token_silent(
             self._graph_api_scopes, account=None)
