@@ -38,10 +38,10 @@ class AzureAD:
         return app
 
     def _request(self, request, **kw):
-        http = requests.Session()
-        http.headers['Authorization'] = 'Bearer %s' % self._auth_token()
-        method, path = request.split(' ')
-        r = getattr(http, method.lower())(self.graph_url + path, **kw)
+        with requests.Session() as http:
+            http.headers['Authorization'] = 'Bearer %s' % self._auth_token()
+            method, path = request.split(' ')
+            r = getattr(http, method.lower())(self.graph_url + path, **kw)
         if not r.ok:
             r.reason = "%s: %s" % (r.reason, r.text)
         r.raise_for_status()
