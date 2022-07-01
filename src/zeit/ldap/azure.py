@@ -35,6 +35,7 @@ class AzureAD:
             self.client_id, self.client_secret,
             authority='https://login.microsoftonline.com/%s' % self.tenant_id)
         app.token_cache = zope.component.getUtility(ITokenCache)
+        app.http_client.close()
         return app
 
     def _request(self, request, **kw):
@@ -56,6 +57,7 @@ class AzureAD:
         if not token:
             log.info('Retrieving access token with client_secret')
             token = self.app.acquire_token_for_client(self._graph_api_scopes)
+            self.app.http_client.close()
         if 'error' in token:
             raise RuntimeError(str(token))
         return token['access_token']
