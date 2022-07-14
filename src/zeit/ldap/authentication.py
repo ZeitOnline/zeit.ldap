@@ -12,6 +12,7 @@ import zope.pluggableauth.plugins.httpplugins
 import zope.pluggableauth.plugins.session
 import zope.principalregistry.principalregistry
 import zope.schema
+import zope.traversing.browser
 
 
 @zope.interface.implementer(zope.pluggableauth.interfaces.IAuthenticatorPlugin)
