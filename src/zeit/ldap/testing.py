@@ -4,7 +4,7 @@ import zeit.cms.testing
 
 product_config = """
 <product-config zeit.ldap>
-  authenticator-plugins principalregistry,ldap
+  authenticator-plugins principalregistry
   credentials-plugins xmlrpc-basic-auth
 
   ad-tenant common

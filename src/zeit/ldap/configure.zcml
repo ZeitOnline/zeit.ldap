@@ -8,18 +8,6 @@
     />
 
   <utility
-    provides=".connection.ILDAPAdapter"
-    name="zeit.ldapconnection"
-    factory=".connection.ldapAdapterFactory"
-    />
-
-  <utility
-    provides="zope.app.authentication.interfaces.IAuthenticatorPlugin"
-    name="ldap"
-    factory=".authentication.ldapPluginFactory"
-    />
-
-  <utility
     provides="zope.pluggableauth.interfaces.IAuthenticatorPlugin"
     factory=".authentication.PrincipalRegistryAuthenticator"
     name="principalregistry"
