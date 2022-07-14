@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.9.0 (unreleased)
+1.9.0 (2022-07-14)
 ------------------
 
 - MAINT: Remove now-unused LDAP codebase
