@@ -1,8 +1,8 @@
 zeit.ldap changes
 =================
 
-1.10.0 (unreleased)
-------------------
+1.10.0 (2023-07-26)
+-------------------
 
 - MAINT: Switch to PEP420 namespace packages
 
