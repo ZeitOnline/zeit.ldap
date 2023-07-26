@@ -12,7 +12,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license='BSD',
-    namespace_packages=['zeit'],
     install_requires=[
         'msal',
         'persistent',
