@@ -1,7 +1,7 @@
 zeit.ldap changes
 =================
 
-1.10.1 (unreleased)
+1.10.1 (2023-07-26)
 -------------------
 
 - Fix brown-bag release
