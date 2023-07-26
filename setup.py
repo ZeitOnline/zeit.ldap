@@ -1,13 +1,13 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 
 setup(
     name='zeit.ldap',
-    version='1.9.1.dev0',
+    version='1.10.0.dev0',
     author='gocept, Zeit Online',
     author_email='zon-backend@zeit.de',
     description="Zope3 LDAP interface",
-    packages=find_packages('src'),
+    packages=find_namespace_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
@@ -16,7 +16,6 @@ setup(
     install_requires=[
         'msal',
         'persistent',
-        'setuptools',
         'transaction',
         'vivi.core',
         'zope.app.appsetup',
