@@ -10,6 +10,7 @@ product_config = """
   ad-tenant common
   ad-client-id none
   ad-client-secret none
+  ad-timeout 1
 </product-config>
 """
 

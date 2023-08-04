@@ -24,10 +24,11 @@ class AzureAD:
 
     graph_url = 'https://graph.microsoft.com/v1.0'
 
-    def __init__(self, tenant_id, client_id, client_secret):
+    def __init__(self, tenant_id, client_id, client_secret, timeout=None):
         self.tenant_id = tenant_id
         self.client_id = client_id
         self.client_secret = client_secret
+        self.timeout = timeout
 
     @cachedproperty
     def app(self):
@@ -39,6 +40,7 @@ class AzureAD:
         return app
 
     def _request(self, request, **kw):
+        kw.setdefault('timeout', self.timeout)
         with requests.Session() as http:
             http.headers['Authorization'] = 'Bearer %s' % self._auth_token()
             method, path = request.split(' ')
@@ -98,7 +100,8 @@ def from_product_config():
     config = zope.app.appsetup.product.getProductConfiguration(
         'zeit.ldap')
     return AzureAD(config['ad-tenant'],
-                   config['ad-client-id'], config['ad-client-secret'])
+                   config['ad-client-id'], config['ad-client-secret'],
+                   float(config['ad-timeout']))
 
 
 @zope.interface.implementer(ITokenCache)
