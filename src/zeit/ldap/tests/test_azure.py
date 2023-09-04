@@ -34,12 +34,12 @@ class PersistentCacheTest(zeit.ldap.testing.FunctionalTestCase):
 
     def test_on_conflict_the_last_commit_wins(self):
         # This is the ordering of events we orchestrate here:
-        # t1: start
-        # t2: start
-        # t2: write bar
-        # t2: commit
-        # t1: write foo
-        # t1: commit --> by default, this would raise ConflictError, but our
+        # * t1: start
+        # * t2: start
+        # * t2: write bar
+        # * t2: commit
+        # * t1: write foo
+        # * t1: commit --> by default, this would raise ConflictError, but our
         # code adjusts this so that it instead overwrites the previous state.
 
         db = self.layer['zodbDB']

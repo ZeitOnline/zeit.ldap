@@ -1,0 +1,7 @@
+# -*- conf -*- vi:syntax=dosini
+
+[flake8]
+ignore = A001,A002,A003,G,I001,I003,I004,I005,I900,IF100,N,PT019,R504,R505,S101,S311,S320,S410,T201,W503,W504
+per-file-ignores =
+    testing.py,test_*.py: S,E501,T003,T201,PT004,PT009
+    interfaces.py: N805
