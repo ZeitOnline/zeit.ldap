@@ -39,3 +39,18 @@ packages = ["src/zeit"]
 strict-naming = false  # required for proper output filename
 [tool.hatch.build.targets.sdist]
 strict-naming = false  # required for proper output filename
+
+
+[tool.towncrier]
+directory = "docs/changelog/"
+filename = "CHANGES.txt"
+# Our changelog file already has a title
+title_format = ""
+# First underline is used for version/date header.
+# Second underline is used for the type names (like 'Bug fixes:').
+underlines = ["-", "+"]
+
+[[tool.towncrier.type]]
+directory = "change"
+name = "Changes"
+showcontent = true

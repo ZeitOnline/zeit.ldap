@@ -1,6 +1,9 @@
 zeit.ldap changes
 =================
 
+.. towncrier release notes start
+
+
 1.11.1 (unreleased)
 -------------------
 
